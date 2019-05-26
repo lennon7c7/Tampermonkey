@@ -6,6 +6,7 @@
 // @author       Lennon
 // @match        https://boxnovel.baidu.com/boxnovel/*
 // @match        https://m.baidu.com/tcx*
+// @match        http://m.zhangyue.com/readbook/*/*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -43,8 +44,77 @@ setTimeout(function () {
         }
 
         siteBaiduTcx(novelChapterid, decodeURIComponent(novelUrl));
+    } else if (location.host === 'm.zhangyue.com') {
+        novelBookid = location.pathname.replace('.html', '').split('/')[2];
+        novelChapterid = location.pathname.replace('.html', '').split('/')[3];
+        novelTitle = bookInfo.name;
+        novelUrl = `${location.origin}${API_URL}/${novelBookid}/${novelChapterid}`;
+
+        siteZhangyue(decodeURIComponent(novelUrl));
     }
 }, 3000);
+
+function siteZhangyue(novelUrl) {
+    if (!novelUrl) {
+        return;
+    }
+
+    $.ajax({
+        url: novelUrl,
+        async: false,
+        dataType: 'json',
+        type: 'GET',
+        success: function (res) {
+            if (res.code !== 0 && res.msg !== 'OK' && !res.html) {
+                if (novelContent) {
+                    novelFilename = `${novelTitle}.txt`;
+                    download(novelContent, novelFilename, 'text/plain');
+                }
+
+                return;
+            }
+
+            novelChapterid++;
+            novelUrl = `${location.origin}${API_URL}/${novelBookid}/${novelChapterid}`;
+
+            if (Number(res.body.chapterName)) {
+                res.body.chapterName = `第${res.body.chapterName}章`;
+            }
+
+            var elementContent = $(`<div>${res.html}</div>`);
+            if (elementContent.find('span').length) {
+                elementContent.find('span').remove();
+                res.html = '';
+                $.each(elementContent.find('p.bodytext'), function (key, value) {
+                    res.html += $(value).text();
+                });
+            } else {
+                res.html = res.html.replace(/<s(\d+),(\d+)>(.*?)<\/s>/g, '<span data-left="$1" data-top="$2">$3</span>').replace(/<d (\d+),(\d+)>/g, '<div>').replace(/\/d/g, '/div');
+
+                var tempContent = [];
+                $.each($(res.html).find('span'), function (key, value) {
+                    tempContent[key] = `${$(value).attr('data-top').padStart(4, 0)}${$(value).attr('data-left').padStart(4, 0)}${$(value).text()}`;
+                });
+                tempContent.sort();
+
+                res.html = '';
+                $.each(tempContent, function (key, value) {
+                    value = value.slice(8);
+                    if (value === '') {
+                        value = '\r\n';
+                    }
+                    res.html += value;
+                });
+            }
+
+            novelContent += `${res.body.chapterName}\r\n${res.html}\r\n\r\n`;
+
+            setTimeout(function () {
+                siteZhangyue(novelUrl);
+            }, 100);
+        }
+    });
+}
 
 function siteBaidu(next_cid) {
     if (!next_cid) {
