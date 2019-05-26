@@ -7,6 +7,7 @@
 // @match        https://boxnovel.baidu.com/boxnovel/*
 // @match        https://m.baidu.com/tcx*
 // @match        http://m.zhangyue.com/readbook/*/*
+// @match        https://wenxue.m.iqiyi.com/book/reader-*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -51,8 +52,62 @@ setTimeout(function () {
         novelUrl = `${location.origin}${API_URL}/${novelBookid}/${novelChapterid}`;
 
         siteZhangyue(decodeURIComponent(novelUrl));
+    } else if (location.host === 'wenxue.m.iqiyi.com') {
+        novelBookid = location.pathname.replace('.html', '').split('/')[2].split('-')[1];
+        novelChapterid = location.pathname.replace('.html', '').split('/')[2].split('-')[2];
+        novelTitle = $('.cutoption:contains("下一章")').attr('title').split('-')[1];
+        novelUrl = location.href;
+
+        siteIqiyi(decodeURIComponent(novelUrl));
     }
 }, 3000);
+
+function siteIqiyi(novelUrl) {
+    if (!novelUrl) {
+        return;
+    }
+
+    var postData = {};
+    if (!getQueryVariable('fr')) {
+        postData.fr = 223946239;
+    }
+
+    $.ajax({
+        url: novelUrl,
+        data: postData,
+        async: false,
+        type: 'GET',
+        success: function (res) {
+            var novelChapterName = $(res).find('.c-name-gap').text();
+            if (Number(novelChapterName)) {
+                novelChapterName = `第${novelChapterName}章`;
+            }
+
+            var tempContent = '';
+            $.each($(res).find('.c-contentB'), function (key, value) {
+                tempContent += `   ${$(value).text().trim()}\r\n`;
+            });
+
+            novelContent += `${novelChapterName}\r\n${tempContent}\r\n\r\n`;
+
+            setTimeout(function () {
+                var elementNextChapter = $(res).find('.m-nav-footer-list li:nth-child(5) a');
+                if (elementNextChapter.attr('changeChapterId') === '') {
+                    if (novelContent) {
+                        novelFilename = `${novelTitle}.txt`;
+                        download(novelContent, novelFilename, 'text/plain');
+                    }
+
+                    return;
+                }
+
+                novelUrl = elementNextChapter.attr('href');
+
+                siteIqiyi(novelUrl);
+            }, 100);
+        }
+    });
+}
 
 function siteZhangyue(novelUrl) {
     if (!novelUrl) {
