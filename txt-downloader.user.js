@@ -5,6 +5,7 @@
 // @description  访问页面，自动导出TXT文件
 // @author       Lennon
 // @match        https://boxnovel.baidu.com/boxnovel/*
+// @match        https://m.baidu.com/tcx*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -31,6 +32,17 @@ setTimeout(function () {
         }
 
         siteBaidu(novelChapterid);
+    } else if (location.host === 'm.baidu.com') {
+        novelUrl = getQueryVariable('url');
+        novelBookid = getQueryVariable('gid');
+        novelChapterid = getQueryVariable('cid');
+        if (document.querySelectorAll('.header')[1]) {
+            novelTitle = document.querySelectorAll('.header')[1].textContent;
+        } else if (document.querySelector('title')) {
+            novelTitle = document.querySelector('title').textContent;
+        }
+
+        siteBaiduTcx(novelChapterid, decodeURIComponent(novelUrl));
     }
 }, 3000);
 
@@ -63,6 +75,39 @@ function siteBaidu(next_cid) {
 
             setTimeout(function () {
                 siteBaidu(res.data.pt.next_cid);
+            }, 100);
+        }
+    });
+}
+
+function siteBaiduTcx(novelChapterid, novelUrl) {
+    if (!novelBookid || !novelChapterid || !novelUrl) {
+        return;
+    }
+
+    $.ajax({
+        url: location.origin + location.pathname,
+        data: {
+            appui: 'alaxs',
+            page: 'api/chapterContent',
+            gid: novelBookid,
+            cid: novelChapterid,
+            url: novelUrl,
+        },
+        async: false,
+        dataType: 'json',
+        type: 'GET',
+        success: function (res) {
+            novelContent += `${res.data.title}\n${res.data.content}\n\n`;
+
+            if (!res.data.pt.next_cid) {
+                novelFilename = `${novelTitle}.txt`;
+                download(novelContent, novelFilename, 'text/plain');
+                return;
+            }
+
+            setTimeout(function () {
+                siteBaiduTcx(res.data.pt.next_cid, res.data.pt.next_url);
             }, 100);
         }
     });
