@@ -19,20 +19,35 @@
             return false;
         }
 
-        $('input[type="radio"][name=resolution][data-name="视网膜 @2x"]').click();
+        $('#unit ul').append(`
+<li>
+    <label>
+        <input type="radio" name="resolution" data-name="CSS Rem 40px" data-unit="rem" data-scale="40">
+        <span>CSS Rem 40px</span>
+    </label>
+</li>
+        `);
+
+        $('input[type="radio"][name=resolution][data-name="CSS Rem 40px"]').click();
 
         $(document.body).css('min-width', 'unset');
 
         var elementScreen = $('#screen');
         $('.screen-viewer-inner').css('width', elementScreen.css('width')).css('height', elementScreen.css('height'));
+
+        changeWidth();
     }, 1000);
 
     $(window).resize(function () {
+        changeWidth();
+    });
+
+    function changeWidth() {
         if (window.innerWidth < 860) {
             $('.screen-viewer').css('width', 'unset').css('margin', '0 20px');
 
         } else {
             $('.screen-viewer').css('width', '100vw').css('margin', '0');
         }
-    });
+    }
 })();
