@@ -139,10 +139,8 @@ function siteZhangyue(novelUrl) {
             var elementContent = $(`<div>${res.html}</div>`);
             if (elementContent.find('span').length) {
                 elementContent.find('span').remove();
-                res.html = '';
-                $.each(elementContent.find('p.bodytext'), function (key, value) {
-                    res.html += $(value).text();
-                });
+                elementContent.find('img').remove();
+                res.html = elementContent.text();
             } else {
                 res.html = res.html.replace(/<s(\d+),(\d+)>(.*?)<\/s>/g, '<span data-left="$1" data-top="$2">$3</span>').replace(/<d (\d+),(\d+)>/g, '<div>').replace(/\/d/g, '/div');
 
