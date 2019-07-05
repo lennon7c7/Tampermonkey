@@ -15,12 +15,12 @@
 // ==/UserScript==
 'use strict';
 
-var novelUrl = '';
-var novelBookid = '';
-var novelChapterid = '';
-var novelFilename = '';
-var novelTitle = '';
-var novelContent = '';
+let novelUrl = '';
+let novelBookid = '';
+let novelChapterid = '';
+let novelFilename = '';
+let novelTitle = '';
+let novelContent = '';
 
 setTimeout(function () {
     if (location.host === 'boxnovel.baidu.com') {
@@ -67,7 +67,7 @@ function siteIqiyi(novelUrl) {
         return;
     }
 
-    var postData = {};
+    let postData = {};
     if (!getQueryVariable('fr')) {
         postData.fr = 223946239;
     }
@@ -78,12 +78,12 @@ function siteIqiyi(novelUrl) {
         async: false,
         type: 'GET',
         success: function (res) {
-            var novelChapterName = $(res).find('.c-name-gap').text();
+            let novelChapterName = $(res).find('.c-name-gap').text();
             if (Number(novelChapterName)) {
                 novelChapterName = `第${novelChapterName}章`;
             }
 
-            var tempContent = '';
+            let tempContent = '';
             $.each($(res).find('.c-contentB'), function (key, value) {
                 tempContent += `   ${$(value).text().trim()}\r\n`;
             });
@@ -91,7 +91,7 @@ function siteIqiyi(novelUrl) {
             novelContent += `${novelChapterName}\r\n${tempContent}\r\n\r\n`;
 
             setTimeout(function () {
-                var elementNextChapter = $(res).find('.m-nav-footer-list li:nth-child(5) a');
+                let elementNextChapter = $(res).find('.m-nav-footer-list li:nth-child(5) a');
                 if (elementNextChapter.attr('changeChapterId') === '') {
                     if (novelContent) {
                         novelFilename = `${novelTitle}.txt`;
@@ -136,15 +136,16 @@ function siteZhangyue(novelUrl) {
                 res.body.chapterName = `第${res.body.chapterName}章`;
             }
 
-            var elementContent = $(`<div>${res.html}</div>`);
+            let elementContent = $(`<div>${res.html}</div>`);
             if (elementContent.find('span').length) {
                 elementContent.find('span').remove();
                 elementContent.find('img').remove();
+                // res.html = elementContent.html().replace(/<h2 (.*?)>(.*?)<\/h2>/g, '$2').replace(/<p (.*?)>(.*?)<\/p>/g, '$2').replace(/<div (.*?)>(.*?)<\/div>/g, '$2');
                 res.html = elementContent.text();
             } else {
                 res.html = res.html.replace(/<s(\d+),(\d+)>(.*?)<\/s>/g, '<span data-left="$1" data-top="$2">$3</span>').replace(/<d (\d+),(\d+)>/g, '<div>').replace(/\/d/g, '/div');
 
-                var tempContent = [];
+                let tempContent = [];
                 $.each($(res.html).find('span'), function (key, value) {
                     tempContent[key] = `${$(value).attr('data-top').padStart(4, 0)}${$(value).attr('data-left').padStart(4, 0)}${$(value).text()}`;
                 });
@@ -237,10 +238,10 @@ function siteBaiduTcx(novelChapterid, novelUrl) {
 }
 
 function getQueryVariable(variable) {
-    var query = window.location.search.substring(1);
-    var vars = query.split('&');
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split('=');
+    let query = window.location.search.substring(1);
+    let vars = query.split('&');
+    for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=');
         if (pair[0] === variable) {
             return pair[1];
         }
