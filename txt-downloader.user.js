@@ -8,6 +8,7 @@
 // @match        https://m.baidu.com/tcx*
 // @match        http://m.zhangyue.com/readbook/*/*
 // @match        https://wenxue.m.iqiyi.com/book/reader-*
+// @match        https://www.bbiquge.com/book_*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -59,8 +60,53 @@ setTimeout(function () {
         novelUrl = location.href;
 
         siteIqiyi(decodeURIComponent(novelUrl));
+    } else if (location.host === 'www.bbiquge.com') {
+        novelBookid = location.pathname.replace('book_', '').split('/')[1];
+        novelTitle = $('meta[name="keywords"]').attr('content').split(',')[0];
+        novelUrl = location.href;
+
+        siteBiquge(decodeURIComponent(novelUrl));
     }
 }, 3000);
+
+function siteBiquge(novelUrl) {
+    if (!novelUrl) {
+        return;
+    }
+
+    $.ajax({
+        url: novelUrl,
+        async: false,
+        type: 'GET',
+        beforeSend: function (xhr) {
+            xhr.overrideMimeType('text/html;charset=gbk');
+        },
+        success: function (res) {
+            let novelChapterName = $(res).find('.bookname > h1').text();
+
+            let tempContent = $(res).find('#content').text();
+            tempContent = tempContent.replace('一秒记住【笔趣阁 www.bbiquge.com】，精彩小说无弹窗免费阅读！', '').replace('《玩宋》/春溪笛晓', '').trim();
+
+            novelContent += `${novelChapterName}\r\n${tempContent}\r\n\r\n`;
+
+            setTimeout(function () {
+                let elementNextChapter = $($(res).find('.bottem > a')[3]);
+                if (elementNextChapter.attr('href').includes('.html') === false) {
+                    if (novelContent) {
+                        novelFilename = `${novelTitle}.txt`;
+                        download(novelContent, novelFilename, 'text/plain');
+                    }
+
+                    return;
+                }
+
+                novelUrl = elementNextChapter.attr('href');
+
+                siteBiquge(novelUrl);
+            }, 100);
+        }
+    });
+}
 
 function siteIqiyi(novelUrl) {
     if (!novelUrl) {
