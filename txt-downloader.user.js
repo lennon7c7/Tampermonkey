@@ -9,6 +9,7 @@
 // @match        http://m.zhangyue.com/readbook/*/*
 // @match        https://wenxue.m.iqiyi.com/book/reader-*
 // @match        https://www.bbiquge.com/book_*
+// @match        https://www.qqxsnew.com/*/*/*.html
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -22,6 +23,7 @@ let novelChapterid = '';
 let novelFilename = '';
 let novelTitle = '';
 let novelContent = '';
+let novelContentReplace = {};
 
 setTimeout(function () {
     if (location.host === 'boxnovel.baidu.com') {
@@ -66,8 +68,93 @@ setTimeout(function () {
         novelUrl = location.href;
 
         siteBiquge(decodeURIComponent(novelUrl));
+    } else if (location.host === 'www.qqxsnew.com') {
+        novelContentReplace = [
+            {
+                searchValue: '天才一秒记住本站地址：[千千小说]',
+                replaceValue: '',
+            },
+            {
+                searchValue: 'https://www.qqxsnew.com最快更新！无广告！',
+                replaceValue: '',
+            },
+            {
+                searchValue: new RegExp(/\s第(.*?)章\s/),
+                replaceValue: '',
+            },
+            {
+                searchValue: '这章超好看！',
+                replaceValue: '',
+            },
+            {
+                searchValue: $('meta[name="description"]').attr('content').replace(/千千小说提供了(.*?)创作的(.*?)干净清爽无错字的文字章节：(.*?)在线阅读。/, '$2/$1'),
+                replaceValue: '',
+            },
+            {
+                searchValue: '章节错误,点此报送(免注册),',
+                replaceValue: '',
+            },
+            {
+                searchValue: '报送后维护人员会在两分钟内校正章节内容,请耐心等待。',
+                replaceValue: '',
+            },
+            {
+                searchValue: new RegExp(/\s\s\s\s/, 'g'),
+                replaceValue: '\n',
+            },
+        ];
+
+        novelBookid = location.pathname.split('/')[2];
+        novelTitle = $('meta[name="keywords"]').attr('content').split(',')[0];
+        novelUrl = location.href;
+
+        siteQqxs(decodeURIComponent(novelUrl));
     }
 }, 3000);
+
+/**
+ * 网站-千千小说
+ * 质量一般，偶尔会有错误章节
+ * @param novelUrl
+ */
+function siteQqxs(novelUrl) {
+    if (!novelUrl) {
+        return;
+    }
+
+    $.ajax({
+        url: novelUrl,
+        async: false,
+        type: 'GET',
+        success: function (res) {
+            let novelChapterName = $(res).find('.bookname > h1').text().trim();
+
+            let tempContent = $(res).find('#content').text();
+            $.each(novelContentReplace, function (key, value) {
+                tempContent = tempContent.replace(value.searchValue, value.replaceValue);
+            });
+            tempContent = tempContent.trim();
+
+            novelContent += `${novelChapterName}\r\n${tempContent}\r\n\r\n`;
+
+            setTimeout(function () {
+                let elementNextChapter = $($(res).find('.bottem1 > a.next'));
+                if (elementNextChapter.attr('href').includes('.html') === false) {
+                    if (novelContent) {
+                        novelFilename = `${novelTitle}.txt`;
+                        download(novelContent, novelFilename, 'text/plain');
+                    }
+
+                    return;
+                }
+
+                novelUrl = elementNextChapter.attr('href');
+
+                siteQqxs(novelUrl);
+            }, 100);
+        }
+    });
+}
 
 function siteBiquge(novelUrl) {
     if (!novelUrl) {
