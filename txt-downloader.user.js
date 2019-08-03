@@ -250,6 +250,9 @@ function siteZhangyue(novelUrl) {
     $.ajax({
         url: novelUrl,
         async: false,
+        data: {
+            p2: 104155
+        },
         dataType: 'json',
         type: 'GET',
         success: function (res) {
