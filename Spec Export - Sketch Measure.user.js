@@ -33,7 +33,7 @@
         $(document.body).css('min-width', 'unset');
 
         var elementScreen = $('#screen');
-        $('.screen-viewer-inner').css('width', elementScreen.css('width')).css('height', elementScreen.css('height'));
+        $('.screen-viewer-inner').css('width', Number(elementScreen.css('width').replace('px', '')) + 80 + 'px').css('height', Number(elementScreen.css('height').replace('px', '')) + 40 + 'px');
 
         changeWidth();
     }, 1000);
