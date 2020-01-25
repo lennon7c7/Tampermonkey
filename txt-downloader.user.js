@@ -20,6 +20,7 @@
 let novelUrl = '';
 let novelBookid = '';
 let novelChapterid = '';
+let novelChaptername = '';
 let novelFilename = '';
 let novelTitle = '';
 let novelContent = '';
@@ -256,7 +257,7 @@ function siteZhangyue(novelUrl) {
         dataType: 'json',
         type: 'GET',
         success: function (res) {
-            if (res.code !== 0 && res.msg !== 'OK' && !res.html) {
+            if (res.body.chapterName === novelChaptername) {
                 if (novelContent) {
                     novelFilename = `${novelTitle}.txt`;
                     download(novelContent, novelFilename, 'text/plain');
@@ -267,6 +268,7 @@ function siteZhangyue(novelUrl) {
 
             novelChapterid++;
             novelUrl = `${location.origin}${API_URL}/${novelBookid}/${novelChapterid}`;
+            novelChaptername = res.body.chapterName;
 
             if (Number(res.body.chapterName)) {
                 res.body.chapterName = `第${res.body.chapterName}章`;
