@@ -106,6 +106,8 @@ async function gameMore() {
                             eventName: eventName,
                             eventClock: eventClock,
                             odd_info: odd_info,
+                            site_id: 1,
+                            site_name: 'bet365',
                         });
                     } else if ($(element4).find('.sip-MarketGroupButton').hasClass('sip-MarketGroup_Open')) {
                         $(element4).click();
@@ -138,20 +140,26 @@ function saveData(data) {
     }
     var odd_info = data.odd_info;
 
+    if (!data.site_id) {
+        console.error('site_id is empty');
+        return;
+    }
+    var site_id = data.site_id;
+
+    if (!data.site_name) {
+        console.error('site_name is empty');
+        return;
+    }
+    var site_name = data.site_name;
+
     var form = new FormData();
-    //    game_id      bigint unsigned default '0' not null comment '赛事ID',
-    //     game_name    varchar(500)    default ''  not null comment '赛事名称',
-    //     team1_id     bigint unsigned default '0' not null comment '球队1ID',
-    //     team1_name   varchar(500)    default ''  not null comment '球队1名称',
-    //     team2_id     bigint unsigned default '0' not null comment '球队2ID',
-    //     team2_name   varchar(500)    default ''  not null comment '球队2名称',
-    //     team_info    varchar(500)    default ''  not null comment '球队信息',
-    //     odd_info     varchar(500)    default ''  not null comment '赔率信息',
     form.append("GameParticipantodds[game_name]", game_name);
     form.append("GameParticipantodds[team1_name]", team1_name);
     form.append("GameParticipantodds[team2_name]", team2_name);
     // form.append("GameParticipantodds[team_info]", team_info);
     form.append("GameParticipantodds[odd_info]", odd_info);
+    form.append("GameParticipantodds[site_id]", site_id);
+    form.append("GameParticipantodds[site_name]", site_name);
 
     var settings = {
         "url": "https://erp2.maoshi.ltd/test/spider",
