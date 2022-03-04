@@ -72,6 +72,12 @@ async function gameMore() {
                 });
                 console.log('teamName', teamName);
 
+                var teamScore = [];
+                $($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).find('.ipn-ScoresDefault_Score > .ipn-ScoresDefault_Score').each(function (index4, element4) {
+                    teamScore.push($(element4).text());
+                });
+                console.log('teamScore', teamScore);
+
                 if (!$($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).hasClass('ipn-Fixture-selected')) {
                     $($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).click();
                     await sleep(2000);
@@ -103,6 +109,7 @@ async function gameMore() {
                         saveData({
                             competitionName: competitionName,
                             teamName: teamName,
+                            teamScore: teamScore,
                             eventName: eventName,
                             eventClock: eventClock,
                             odd_info: odd_info,
@@ -134,6 +141,13 @@ function saveData(data) {
     var team1_name = data.teamName[0];
     var team2_name = data.teamName[1];
 
+    if (!data.teamScore || data.teamScore.length !== 2) {
+        console.error('teamScore is empty');
+        return;
+    }
+    var team1_score = data.teamScore[0];
+    var team2_score = data.teamScore[1];
+
     if (!data.odd_info) {
         console.error('odd is empty');
         return;
@@ -155,7 +169,9 @@ function saveData(data) {
     var form = new FormData();
     form.append("GameParticipantodds[game_name]", game_name);
     form.append("GameParticipantodds[team1_name]", team1_name);
+    form.append("GameParticipantodds[team1_score]", team1_score);
     form.append("GameParticipantodds[team2_name]", team2_name);
+    form.append("GameParticipantodds[team2_score]", team2_score);
     // form.append("GameParticipantodds[team_info]", team_info);
     form.append("GameParticipantodds[odd_info]", odd_info);
     form.append("GameParticipantodds[site_id]", site_id);
