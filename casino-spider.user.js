@@ -104,8 +104,31 @@ async function gameMore() {
                             $(element4).click();
                         }
 
-                        var odd_info = $.trim($(element4).find('.gl-MarketGroupContainer').text());
-                        console.log('odd_info', odd_info);
+                        var odd_info = [];
+                        var participantLabel = $(element4).find('.srb-ParticipantLabelCentered_Name');
+                        var participantOddOver = $(element4).find('.gl-MarketColumnHeader:contains("高于")').parent().find('.gl-Market_General-cn1');
+                        var participantOddUnder = $(element4).find('.gl-MarketColumnHeader:contains("低于")').parent().find('.gl-Market_General-cn1');
+                        if (!participantLabel || !participantOddOver || !participantOddUnder ||
+                            participantLabel.length !== participantOddOver.length ||
+                            participantOddOver.length !== participantOddUnder.length) {
+                            console.debug('odd_info not match');
+                            return false;
+                        }
+                        participantLabel.each(function (index5, element5) {
+                            odd_info[index5] = [];
+                            odd_info[index5][0] = $.trim($(element5).text());
+                        });
+
+                        participantOddOver.each(function (index5, element5) {
+                            odd_info[index5][1] = $.trim($(element5).text());
+                        });
+
+                        participantOddUnder.each(function (index5, element5) {
+                            odd_info[index5][2] = $.trim($(element5).text());
+                        });
+
+                        console.table('odd_info', odd_info);
+                        odd_info = JSON.stringify(odd_info);
                         saveData({
                             competitionName: competitionName,
                             teamName: teamName,
