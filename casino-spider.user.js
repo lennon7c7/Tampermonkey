@@ -31,15 +31,18 @@ async function main() {
 /**
  */
 async function siteBet365() {
-    // plan a
-    // sometime page don't have data
-    // for (var i = 0; i < $('.ipn-Classification').length; i++) {
-    //     await soccerDetail();
-    // }
-
-    // plan b
-    await soccerDetail();
-    location.reload();
+    switch (true) {
+        case location.hash === '#/IP/B1':
+            await soccerList();
+            break;
+        case location.hash.indexOf('#/IP/EV') >= 0:
+            await soccerDetail();
+            location.reload();
+            break;
+        default :
+            console.error('no match page hash');
+            break;
+    }
 }
 
 
@@ -144,6 +147,39 @@ async function soccerDetail() {
             }
         }
     }
+}
+
+
+/**
+ * 在足球列表里面循环所有该项赛事
+ */
+async function soccerList() {
+    //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-CompetitionHeader_NameText').text()
+    // '英格兰超级联赛'
+
+    //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-InPlayTimer').text()
+    // '55:13'
+
+    //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-FixtureDetailsTwoWay_TeamName ').text()
+    // '沃特福德阿森纳'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-FixtureDetailsTwoWay_TeamName:first').text()
+    // '沃特福德'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-FixtureDetailsTwoWay_TeamName:last').text()
+    // '阿森纳'
+
+    //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-StandardScores_TeamOne').text()
+    // '1'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-StandardScores_TeamTwo').text()
+    // '2'
+
+    //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-ParticipantStackedCentered_Handicap:first').text()
+    // ' 4.0,4.5'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-ParticipantStackedCentered_Handicap:last').text()
+    // ' 4.0,4.5'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-ParticipantStackedCentered_Odds:first').text()
+    // '2.090'
+    // $($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-ParticipantStackedCentered_Odds:last').text()
+    // '1.810'
 }
 
 /**
