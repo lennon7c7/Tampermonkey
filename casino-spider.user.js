@@ -34,63 +34,62 @@ async function siteBet365() {
     // plan a
     // sometime page don't have data
     // for (var i = 0; i < $('.ipn-Classification').length; i++) {
-    //     await gameMore();
+    //     await soccerDetail();
     // }
 
     // plan b
-    await gameMore();
+    await soccerDetail();
     location.reload();
 }
 
 
-async function gameMore() {
-    for (var i = 0; i < $('.ipn-Classification').length; i++) {
-        var categoryName = $($('.ipn-Classification')[i]).find('.ipn-ClassificationButton_Label').text();
+/**
+ * 在足球详情里面循环所有该项赛事
+ */
+async function soccerDetail() {
+    var elementSport = $('.ipn-Classification');
+    for (var i = 0; i < elementSport.length; i++) {
+        var categoryName = $(elementSport[i]).find('.ipn-ClassificationButton_Label').text();
         if (categoryName !== '足球') {
             continue;
         }
 
-        if (!$($('.ipn-Classification')[i]).hasClass('ipn-Classification-open')) {
-            $($('.ipn-Classification')[i]).click();
+        if (!$(elementSport[i]).hasClass('ipn-Classification-open')) {
+            $(elementSport[i]).click();
         }
 
-        console.log('categoryName', categoryName);
         // 赛事
-        for (var j = 0; j < $('.ipn-Competition').length; j++) {
-            var competitionName = $($('.ipn-Competition')[j]).find('.ipn-CompetitionButton_Text').text();
-            console.log('competitionName', competitionName);
+        var elementCompetition = $('.ipn-Competition');
+        for (var j = 0; j < elementCompetition.length; j++) {
+            var competitionName = $(elementCompetition[j]).find('.ipn-CompetitionButton_Text').text();
 
-            if ($($('.ipn-Competition')[j]).hasClass('ipn-Competition-closed ')) {
-                $($('.ipn-Competition')[j]).click();
+            if ($(elementCompetition[j]).hasClass('ipn-Competition-closed ')) {
+                $(elementCompetition[j]).click();
             }
 
             await sleep(1000);
-            for (var k = 0; k < $($('.ipn-Competition')[j]).find('.ipn-Fixture').length; k++) {
+            for (var k = 0; k < $(elementCompetition[j]).find('.ipn-Fixture').length; k++) {
                 var teamName = [];
-                $($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).find('.ipn-Fixture_Team').each(function (index4, element4) {
+                $($(elementCompetition[j]).find('.ipn-Fixture')[k]).find('.ipn-Fixture_Team').each(function (index4, element4) {
                     teamName.push($(element4).text());
                 });
-                console.log('teamName', teamName);
 
                 var teamScore = [];
-                $($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).find('.ipn-ScoresDefault_Score > .ipn-ScoresDefault_Score').each(function (index4, element4) {
+                $($(elementCompetition[j]).find('.ipn-Fixture')[k]).find('.ipn-ScoresDefault_Score > .ipn-ScoresDefault_Score').each(function (index4, element4) {
                     teamScore.push($(element4).text());
                 });
-                console.log('teamScore', teamScore);
 
-                if (!$($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).hasClass('ipn-Fixture-selected')) {
-                    $($($('.ipn-Competition')[j]).find('.ipn-Fixture')[k]).click();
+                if (!$($(elementCompetition[j]).find('.ipn-Fixture')[k]).hasClass('ipn-Fixture-selected')) {
+                    $($(elementCompetition[j]).find('.ipn-Fixture')[k]).click();
                     await sleep(2000);
                 }
 
                 // '科莫 v 科森察'
                 // $('.ipe-EventHeader_ClockContainer').text()
                 var eventName = $('.ipe-EventHeader_Fixture').text();
-                console.log('eventName', eventName);
 
                 // 72:27
                 var eventClock = $('.ipe-EventHeader_ClockContainer').text()
-                console.log('eventClock', eventClock);
 
                 $('.sip-MarketGroup').each(function (index4, element4) {
                     var marketGroup = $(element4).find('.sip-MarketGroupButton_Text').text();
@@ -111,7 +110,7 @@ async function gameMore() {
                         if (!participantLabel || !participantOddOver || !participantOddUnder ||
                             participantLabel.length !== participantOddOver.length ||
                             participantOddOver.length !== participantOddUnder.length) {
-                            console.debug('odd_info not match');
+                            console.error('odd_info not match');
                             return false;
                         }
                         participantLabel.each(function (index5, element5) {
@@ -127,7 +126,6 @@ async function gameMore() {
                             odd_info[index5][2] = $.trim($(element5).text());
                         });
 
-                        console.table('odd_info', odd_info);
                         odd_info = JSON.stringify(odd_info);
                         saveData({
                             competitionName: competitionName,
@@ -142,14 +140,16 @@ async function gameMore() {
                     } else if ($(element4).find('.sip-MarketGroupButton').hasClass('sip-MarketGroup_Open')) {
                         $(element4).click();
                     }
-
                 });
             }
         }
     }
-
 }
 
+/**
+ * 保存数据
+ * @param {object} data
+ */
 function saveData(data) {
     if (!data.competitionName) {
         console.error('competitionName is empty');
@@ -215,14 +215,12 @@ function saveData(data) {
         "data": form
     };
 
-    $.ajax(settings).done(function (response) {
-        console.log(response);
-    });
+    $.ajax(settings).done();
 }
 
 /**
- *
- * @param {int} duration
+ * 延迟执行
+ * @param {int} duration 毫秒
  */
 function sleep(duration) {
     return new Promise(resolve => {
