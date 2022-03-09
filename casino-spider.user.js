@@ -10,16 +10,18 @@
 // ==/UserScript==
 'use strict';
 
+console.debug('---------- start ----------');
+
 setTimeout(function () {
     main();
 }, 20000);
 
 async function main() {
-    console.debug('---------- start ----------');
-
     const script = document.createElement('script');
     script.src = 'https://code.jquery.com/jquery-2.1.1.min.js';
     document.head.append(script);
+
+    checkCaptcha()
 
     if (location.host === 'www.365sb.com') {
         await siteBet365();
@@ -35,9 +37,9 @@ async function siteBet365() {
         case location.hash === '#/IP/B1':
             await soccerList();
             break;
-        case location.hash.indexOf('#/IP/EV') >= 0:
+        case location.hash.indexOf('#/IP/EV') !== -1:
             await soccerDetail();
-            location.reload();
+            // location.reload();
             break;
         default :
             console.error('no match page hash');
@@ -47,7 +49,8 @@ async function siteBet365() {
 
 
 /**
- * 在足球详情里面循环所有该项赛事
+ * 足球 - 滚球盘 详情页面
+ * 循环所有该项赛事
  */
 async function soccerDetail() {
     var elementSport = $('.ipn-Classification');
@@ -72,6 +75,9 @@ async function soccerDetail() {
 
             await sleep(1000);
             for (var k = 0; k < $(elementCompetition[j]).find('.ipn-Fixture').length; k++) {
+                var timer = $($(elementCompetition[j]).find('.ipn-Fixture')[k]).find('.ipn-Fixture_TimerContainer').text();
+                saveTimer(categoryName, timer);
+
                 var teamName = [];
                 $($(elementCompetition[j]).find('.ipn-Fixture')[k]).find('.ipn-Fixture_Team').each(function (index4, element4) {
                     teamName.push($(element4).text());
@@ -91,17 +97,14 @@ async function soccerDetail() {
                 // $('.ipe-EventHeader_ClockContainer').text()
                 var eventName = $('.ipe-EventHeader_Fixture').text();
 
-                // 72:27
-                var eventClock = $('.ipe-EventHeader_ClockContainer').text()
-
                 $('.sip-MarketGroup').each(function (index4, element4) {
                     var marketGroup = $(element4).find('.sip-MarketGroupButton_Text').text();
                     // 亚洲让分盘
-                    // if (marketGroup.indexOf('让分盘') >= 0 && $(element4).hasClass('sip-MarketGroup_Open')) {
+                    // if (marketGroup.indexOf('让分盘') !== -1 && $(element4).hasClass('sip-MarketGroup_Open')) {
                     //     $(element4).click();
                     // }
 
-                    if (marketGroup.indexOf('大小盘') >= 0) {
+                    if (marketGroup.indexOf('大小盘') !== -1) {
                         if (!$(element4).find('.sip-MarketGroupButton').hasClass('sip-MarketGroup_Open')) {
                             $(element4).click();
                         }
@@ -135,7 +138,7 @@ async function soccerDetail() {
                             teamName: teamName,
                             teamScore: teamScore,
                             eventName: eventName,
-                            eventClock: eventClock,
+                            timer: timer,
                             odd_info: odd_info,
                             site_id: 1,
                             site_name: 'bet365',
@@ -147,13 +150,16 @@ async function soccerDetail() {
             }
         }
     }
+
+    await soccerDetail()
 }
 
-
 /**
- * 在足球列表里面循环所有该项赛事
+ * 足球 - 滚球盘 列表页面
  */
 async function soccerList() {
+    await listJumpToDetail()
+
     //$($('.ovm-CompetitionList > .ovm-Competition-open')[0]).find('.ovm-CompetitionHeader_NameText').text()
     // '英格兰超级联赛'
 
@@ -251,7 +257,79 @@ function saveData(data) {
         "data": form
     };
 
-    $.ajax(settings).done();
+    // $.ajax(settings).done();
+
+}
+
+
+/**
+ * 保存比赛时间
+ * @param {string} sport
+ * @param {string} timer
+ */
+function saveTimer(sport, timer) {
+    if (!sport) {
+        console.error('sport is empty');
+        return;
+    }
+
+    if (!timer) {
+        console.error('timer is empty');
+        return;
+    }
+
+    timer = timer.split(':');
+    if (timer.length !== 2) {
+        console.error('after split is empty');
+        return;
+    }
+    timer = timer[0];
+
+    var keyTimer = sport + '-timer';
+    var keyUrl = sport + '-url';
+    if (!getCookie(keyTimer)) {
+        setCookie(keyTimer, timer)
+        setCookie(keyUrl, location.href)
+    }
+
+    if (getCookie(keyTimer) > timer) {
+        setCookie(keyTimer, timer)
+        setCookie(keyUrl, location.href)
+    }
+
+    return;
+}
+
+/**
+ * 因为无法从列表click到详情页面，所以用此种迂回的方式跳转到详情页面，迈向自动化又前进一步
+ */
+async function listJumpToDetail() {
+    var sport = $('.ovm-ClassificationHeader_Text').text()
+    if (!sport) {
+        return
+    }
+
+    var keyTimer = sport + '-timer'
+    var keyUrl = sport + '-url'
+    var cookieUrl = getCookie(keyUrl)
+    if (getCookie(keyTimer) && cookieUrl) {
+        // on macbook, this not work, try on pc
+        location.href = cookieUrl;
+        sleep(3000)
+        location.reload()
+    }
+}
+
+/**
+ * 检查是否要验证码
+ */
+function checkCaptcha() {
+    setInterval(function () {
+        var documentTitle = ['Attention Required! | Cloudflare']
+        if (documentTitle.indexOf(document.title) !== -1) {
+            location.reload()
+        }
+    }, 60000)
 }
 
 /**
@@ -262,4 +340,37 @@ function sleep(duration) {
     return new Promise(resolve => {
         setTimeout(resolve, duration);
     })
+}
+
+/**
+ * 设置cookie
+ * @param key
+ * @param value
+ * @param day
+ */
+function setCookie(key, value, day) {
+    if (!day) {
+        day = 1;
+    }
+    var d = new Date();
+    d.setTime(d.getTime() + (day * 24 * 60 * 60 * 1000));
+    var expires = 'expires=' + d.toGMTString();
+    document.cookie = key + '=' + value + '; ' + expires;
+}
+
+/**
+ * 获取cookie
+ * @param key
+ * @return {string}
+ */
+function getCookie(key) {
+    var name = key + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(name) !== -1) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return '';
 }
