@@ -231,33 +231,26 @@ function saveData(data) {
     }
     var site_name = data.site_name;
 
-    var form = new FormData();
-    form.append("GameParticipantodds[game_name]", game_name);
-    form.append("GameParticipantodds[team1_name]", team1_name);
-    form.append("GameParticipantodds[team1_score]", team1_score);
-    form.append("GameParticipantodds[team2_name]", team2_name);
-    form.append("GameParticipantodds[team2_score]", team2_score);
-    // form.append("GameParticipantodds[team_info]", team_info);
-    form.append("GameParticipantodds[odd_info]", odd_info);
-    form.append("GameParticipantodds[site_id]", site_id);
-    form.append("GameParticipantodds[site_name]", site_name);
-
     var settings = {
-        "url": "https://erp2.maoshi.ltd/test/spider",
+        "url": "https://localhost/spider",
         "method": "POST",
         "timeout": 0,
         "headers": {
-            "Connection": "keep-alive",
-            "Accept": "*/*",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+            "Content-Type": "application/json"
         },
-        "processData": false,
-        "mimeType": "multipart/form-data",
-        "contentType": false,
-        "data": form
+        "data": JSON.stringify({
+            "gameName": game_name,
+            "team1Name": team1_name,
+            "team1Score": team1_score,
+            "team2Name": team2_name,
+            "team2Score": team2_score,
+            "oddInfo": odd_info,
+            "siteID": site_id,
+            "siteName": site_name
+        }),
     };
 
-    // $.ajax(settings).done();
+    $.ajax(settings).done();
 
 }
 
