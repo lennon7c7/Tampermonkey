@@ -318,7 +318,7 @@ async function listJumpToDetail() {
  */
 function checkCaptcha() {
     setInterval(function () {
-        var documentTitle = ['Attention Required! | Cloudflare']
+        var documentTitle = ['Attention Required! | Cloudflare', 'Please Wait... | Cloudflare']
         if (documentTitle.indexOf(document.title) !== -1) {
             location.reload()
         }
