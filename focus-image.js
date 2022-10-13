@@ -386,9 +386,22 @@ function siteJPMN5() {
     }
 
     function detailPage() {
-        function intoDetailSingle() {
+        function intoDetailSingle(imgUrl) {
             $('.mySwiper').show();
-            setTimeout(scroll(0,0), 500);
+            setTimeout(function () {
+                if (imgUrl) {
+                    $(swiper.virtual.slides).each(function (index, element) {
+                        if ($(element).find('img').attr('src') !== imgUrl) {
+                            return
+                        }
+
+                        console.log('index: ', index)
+                        swiper.slideTo(index)
+                    });
+                }
+
+                scroll(0,0)
+            }, 600);
         }
 
         var swiper
@@ -436,7 +449,7 @@ function siteJPMN5() {
                     let imgSrc = $(data).find(".article-content").children("p").children('img')[i]['src']
                     pic_all.push(imgSrc)
                     tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
-                    $('.article-header').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                    $('.article-header').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
                 }
                 swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
                 // console.log('pic_all: ', pic_all)
@@ -470,7 +483,7 @@ function siteJPMN5() {
             let imgSrc = img_p.children('img')[i]['src']
             urlList.push(imgSrc)
             tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
-            $('.article-header').append(`<img src="${imgSrc}" style="width: 100px;" onclick="intoDetailSingle()">`)
+            $('.article-header').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
         }
         swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
 
@@ -481,9 +494,9 @@ function siteJPMN5() {
         }
 
 
-        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
-        $(document).on('click', '#focus-image', function () {
-            intoDetailSingle();
+        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" class="focus-image">专注看图</a></li>`)
+        $(document).on('click', '.focus-image', function () {
+            intoDetailSingle($(this).attr('src'));
         });
     }
 
