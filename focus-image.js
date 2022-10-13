@@ -174,6 +174,19 @@ function siteJPMN5() {
             });
         }
 
+        function scrollNextTransitionStart() {
+            if (!page_current_too || page_current_too >= page_total_num) {
+                return
+            }
+
+            page_current_too++;
+            let nextPageUrl = `${page_url}page_${page_current_too}.html`
+            $.get(nextPageUrl, function (dom) {
+                $('.related_posts').append($(dom).find('.related_posts li'))
+            });
+        }
+
+
         function backToList() {
             $('#detailList').css('height', '0').css('width', '0').hide()
             $('#firstList').css('height', '100%').css('width', '100%').show()
@@ -369,6 +382,7 @@ function siteJPMN5() {
         }
         let page_currentDom = $('.current');
         let page_current = parseInt(page_currentDom.first().text());
+        let page_current_too = page_current;
         let page_url = page_currentDom.attr('href');
 
         let tempHtml = [];
@@ -382,6 +396,66 @@ function siteJPMN5() {
         $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
         $(document).on('click', '#focus-image', function () {
             run();
+        });
+
+        let startX, startY;
+
+        // 获得角度
+        function getAngle(x, y) {
+            return Math.atan2(y, x) * 180 / Math.PI;
+        }
+
+        // 根据起点终点返回方向 1向上 2向下 3向左 4向右 0未滑动
+        function getDirection(startx, starty, endx, endy) {
+            var angx = endx - startx;
+            var angy = endy - starty;
+            var result = 0;
+
+            // 如果滑动距离太短
+            if (Math.abs(angx) < 2 && Math.abs(angy) < 2) {
+                return result;
+            }
+
+            var angle = getAngle(angx, angy);
+            if (angle >= -135 && angle <= -45) {
+                result = 1;
+            } else if (angle > 45 && angle < 135) {
+                result = 2;
+            } else if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle < -135)) {
+                result = 3;
+            } else if (angle >= -45 && angle <= 45) {
+                result = 4;
+            }
+
+            return result;
+        }
+
+        // 手指接触屏幕
+        document.addEventListener("touchstart", function (e) {
+            startX = e.touches[0].pageX;
+            startY = e.touches[0].pageY;
+        }, false);
+        // 手指离开屏幕
+        document.addEventListener("touchend", function (e) {
+            var endX, endY;
+            endX = e.changedTouches[0].pageX;
+            endY = e.changedTouches[0].pageY;
+            var direction = getDirection(startX, startY, endX, endY);
+            switch (direction) {
+                case 1:
+                    // console.log("向上！")
+                    scrollNextTransitionStart()
+                    break;
+                case 4:
+                    // console.log("向右！")
+                    scrollNextTransitionStart()
+                    break;
+                default:
+            }
+        }, false);
+
+        $(document).scroll(function() {
+            scrollNextTransitionStart()
         });
     }
 
