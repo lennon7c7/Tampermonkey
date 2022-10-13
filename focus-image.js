@@ -34,7 +34,7 @@ function fullscreen() {
 function siteJPMN5() {
     function removeShit() {
         $('img[src="/uploadfile/zyx.gif"], img[src="https://pic.jpmn5.com/img/zz1.gif"]').remove()
-        $('.logo, .searchform, .title-h2l, .sidebar, .footer').remove()
+        $('.logo, .searchform, .title-h2l, .sidebar, #NavTop, .footer').remove()
         $('.content').css('margin-right', 'unset')
     }
 
