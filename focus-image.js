@@ -34,7 +34,7 @@ function fullscreen() {
 function siteJPMN5() {
     function removeShit() {
         $('img[src="/uploadfile/zyx.gif"], img[src="https://pic.jpmn5.com/img/zz1.gif"]').remove()
-        $('.logo, .searchform, .title-h2l, .sidebar, #NavTop, .footer').remove()
+        $('.logo, .title-h2l, .sidebar, #NavTop, .footer').remove()
         $('.content').css('margin-right', 'unset')
     }
 
@@ -152,6 +152,67 @@ function siteJPMN5() {
         });
         //插入按钮
         $('.logo').html(div)
+    }
+
+    function searchPage() {
+        function slideNextTransitionStart() {
+            $('body > .container').html('')
+            $.get(window.location.href, function (dom) {
+                $(dom).find('.node > a').each(function () {
+                    let href = $(this).attr('href')
+                    $.get(href, function (dom2) {
+                        $(dom2).find('.article-content > p > img').each(function () {
+                            let imgSrc = $(this).attr('src')
+                            $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                        });
+
+                        $(dom2).find('.pagination').first().find("a:not(':first,:last')").each(function () {
+                            let href = $(this).attr('href')
+                            $.get(href, function (dom3) {
+                                $(dom3).find('.article-content > p > img').each(function () {
+                                    let imgSrc = $(this).attr('src')
+                                    $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                                });
+                            });
+                        });
+
+                    });
+                });
+
+                $(dom).find('.list .pagination a').each(function (index) {
+                    if (index === 0 ) {
+                        return;
+                    }
+
+                    $.get($(this).attr('href'), function (dom2) {
+                        $(dom2).find('.node > a').each(function () {
+                            let href = $(this).attr('href')
+                            $.get(href, function (dom3) {
+                                $(dom3).find('.article-content > p > img').each(function () {
+                                    let imgSrc = $(this).attr('src')
+                                    $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        function backToList() {
+            $('#detailList').css('height', '0').css('width', '0').hide()
+            $('#firstList').css('height', '100%').css('width', '100%').show()
+        }
+
+        function backToDetailList() {
+            $('#detailList').show()
+            $('#detailSingle').hide()
+        }
+
+        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
+        $(document).on('click', '#focus-image', function () {
+            slideNextTransitionStart();
+        });
     }
 
     function listPage() {
@@ -578,6 +639,8 @@ function siteJPMN5() {
 
     if (location.pathname === '/') {
         indexPage()
+    } else if (location.pathname === '/plus/search/index.asp') {
+        searchPage()
     } else if ($('.article-meta').length === 1) {
         detailPage()
     } else if ($('.related_img').length > 0) {
