@@ -4,6 +4,7 @@
 // @description  click something or make some operations fast
 // @author       Lennon
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
+// @match        https://goerlifaucet.com
 // @require      http://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
@@ -14,6 +15,8 @@
 setTimeout(function () {
     if ($.inArray(location.hostname, ['www.fuyin9.com']) >= 0) {
         siteFuyin9();
+    } else if ($.inArray(location.hostname, ['goerlifaucet.com']) >= 0) {
+        siteGoerli();
     }
 }, 3000);
 
@@ -39,4 +42,15 @@ function siteFuyin9() {
     setTimeout(function () {
         $('#kuPlayer').jPlayer('play');
     }, 3000);
+}
+
+/**
+ * 自动获取eth
+ */
+function siteGoerli() {
+    setTimeout(function () {
+        let address = '0xdb378422487862250140E1aF6AeCEFA0BB59b8d8'
+        $('.alchemy-faucet-panel-input-text').val(address)
+        $('.alchemy-faucet-button').click()
+    }, 10000);
 }
