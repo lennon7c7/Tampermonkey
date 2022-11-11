@@ -4,7 +4,7 @@
 // @description  filter something you don't need or make some operation easy
 // @author       Lennon
 // @match        https://www.tapd.cn/*
-// @require      http://code.jquery.com/jquery-2.1.1.min.js
+// @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @run-at       document-end
 // @icon         http://icons.iconarchive.com/icons/iconshock/cms/128/user-login-icon.png
 // ==/UserScript==

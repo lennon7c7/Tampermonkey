@@ -5,7 +5,7 @@
 // @author       Lennon
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
 // @match        https://goerlifaucet.com
-// @require      http://code.jquery.com/jquery-2.1.1.min.js
+// @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
 // @icon         http://icons.iconarchive.com/icons/iconshock/cms/128/user-login-icon.png

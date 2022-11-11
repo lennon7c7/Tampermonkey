@@ -7,7 +7,7 @@
 // @match        *://*/*
 // @match        *://*
 // @match        *
-// @require      http://code.jquery.com/jquery-2.1.1.min.js
+// @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @run-at       document-end
 // @icon         http://utom.design/assets/imgs/logo@2x.png
 // ==/UserScript==
