@@ -11,6 +11,7 @@
 // @match        *.juzikuaidai.com:36081/*
 // @match        *.youbo.mesio.cn/*
 // @match        *localhost/*
+// @match        https://git1.maoshi.ltd/users/sign_in
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @run-at       document-end
 // @icon         http://icons.iconarchive.com/icons/iconshock/cms/128/user-login-icon.png
@@ -26,8 +27,21 @@ setTimeout(function () {
         siteWulihub();
     } else if ($.inArray(location.hostname, ['qiye.163.com', 'mail.ym.163.com', 'ym.163.com']) >= 0) {
         site163mail();
+    } else if ($.inArray(location.hostname, ['git1.maoshi.ltd']) >= 0) {
+        siteGitlab();
     }
-}, 800);
+}, 2000);
+
+function siteGitlab() {
+    var elementUsername = $('#user_login');
+    var elementPassword = $('#user_password');
+    var elementButton = $('input[value="Sign in"]');
+    if (!elementUsername.val() || !elementPassword.val() || !elementButton.length) {
+        return false;
+    }
+
+    elementButton.click();
+}
 
 function site163mail() {
     var url = 'https://qiye.163.com/login';
