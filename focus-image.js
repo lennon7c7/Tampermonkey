@@ -155,15 +155,54 @@ function siteJPMN5() {
     }
 
     function searchPage() {
+        function scrollNextTransitionStart() {
+            if (page_current > page_total_num) {
+                return
+            }
+
+            page_current++;
+
+            let nextPageUrl = `${location.href}&p=${page_current}`
+            $.get(nextPageUrl, function (dom) {
+                showImg($(dom).find('.list > .node > p > a'))
+            });
+        }
+
+        function showImg(dom) {
+            $('.description, .info').hide()
+
+            dom.each(function (index, element) {
+                let href = $(this).attr('href')
+                $.get(href, function (dom2) {
+                    let tempHtmlImg = ''
+                    let tempHtmlTitle = $(dom2).find('.article-title').text()
+                    $(dom2).find('.article-content > p > img').each(function () {
+                        let imgSrc = $(this).attr('src')
+                        tempHtmlImg += `<img src="${imgSrc}" style="width: 100px;">`
+                    });
+
+                    $('.node').append(`<a href="${href}" target="_blank">${tempHtmlTitle}<br/>${tempHtmlImg}</a><hr>`)
+                });
+            });
+        }
+
         function slideNextTransitionStart() {
-            $('body > .container').html('')
+            $('body > .container').html('').css('max-width', '100%')
+            let css = 'body > .container > img { width: 148px}'
+            var node = document.createElement("style");
+            node.type = "text/css";
+            node.appendChild(document.createTextNode(css));
+            var heads = document.getElementsByTagName("head");
+            heads[0].appendChild(node);
+
             $.get(window.location.href, function (dom) {
                 $(dom).find('.node > a').each(function () {
                     let href = $(this).attr('href')
                     $.get(href, function (dom2) {
                         $(dom2).find('.article-content > p > img').each(function () {
                             let imgSrc = $(this).attr('src')
-                            $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                            $('body > .container').append(`<img src="${imgSrc}">`)
+                            tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
                         });
 
                         $(dom2).find('.pagination').first().find("a:not(':first,:last')").each(function () {
@@ -171,16 +210,16 @@ function siteJPMN5() {
                             $.get(href, function (dom3) {
                                 $(dom3).find('.article-content > p > img').each(function () {
                                     let imgSrc = $(this).attr('src')
-                                    $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                                    $('body > .container').append(`<img src="${imgSrc}">`)
+                                    tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
                                 });
                             });
                         });
-
                     });
                 });
 
                 $(dom).find('.list .pagination a').each(function (index) {
-                    if (index === 0 ) {
+                    if (index === 0) {
                         return;
                     }
 
@@ -190,13 +229,33 @@ function siteJPMN5() {
                             $.get(href, function (dom3) {
                                 $(dom3).find('.article-content > p > img').each(function () {
                                     let imgSrc = $(this).attr('src')
-                                    $('body > .container').append(`<img src="${imgSrc}" style="width: 100px;">`)
+                                    $('body > .container').append(`<img src="${imgSrc}">`)
+                                    tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
                                 });
                             });
                         });
                     });
                 });
             });
+        }
+
+        function intoDetailSingle(imgUrl) {
+            swiper.virtual.appendSlide(tempHtml);
+
+            $('.mySwiper').show();
+            setTimeout(function () {
+                if (imgUrl) {
+                    $(swiper.virtual.slides).each(function (index, element) {
+                        if ($(element).find('img').attr('src') !== imgUrl) {
+                            return
+                        }
+
+                        swiper.slideTo(index)
+                    });
+                }
+
+                scroll(0, 0)
+            }, 600);
         }
 
         function backToList() {
@@ -213,6 +272,106 @@ function siteJPMN5() {
         $(document).on('click', '#focus-image', function () {
             slideNextTransitionStart();
         });
+
+        $(document).on('click', 'body > .container > img', function () {
+            intoDetailSingle($(this).attr('src'));
+        });
+
+        var swiper
+        let tempHtml = [];
+
+        //插入
+        $('body').prepend(`<div class="swiper mySwiper hide"><div class="swiper-wrapper"></div></div>`);
+
+        swiper = new Swiper('.mySwiper', {
+            direction: 'vertical',
+            virtual: {
+                cache: false, //关闭缓存
+            },
+            grabCursor: true,
+            mousewheel: true,
+            keyboard: {
+                enabled: true,
+                pageUpDown: true,
+            },
+            on: {
+                keyPress: function (event, keyboard) {
+                    switch (keyboard) {
+                        case keyEsc:
+                            $('.mySwiper').hide()
+                            break;
+                    }
+                },
+            },
+            parallax: true,
+            effect: 'fade',
+        });
+
+        let page_total_num = $('.list .pagination a:not(":first")').length;
+        let page_current = 0;
+
+        let startX, startY;
+
+        // 获得角度
+        function getAngle(x, y) {
+            return Math.atan2(y, x) * 180 / Math.PI;
+        }
+
+        // 根据起点终点返回方向 1向上 2向下 3向左 4向右 0未滑动
+        function getDirection(startx, starty, endx, endy) {
+            var angx = endx - startx;
+            var angy = endy - starty;
+            var result = 0;
+
+            // 如果滑动距离太短
+            if (Math.abs(angx) < 2 && Math.abs(angy) < 2) {
+                return result;
+            }
+
+            var angle = getAngle(angx, angy);
+            if (angle >= -135 && angle <= -45) {
+                result = 1;
+            } else if (angle > 45 && angle < 135) {
+                result = 2;
+            } else if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle < -135)) {
+                result = 3;
+            } else if (angle >= -45 && angle <= 45) {
+                result = 4;
+            }
+
+            return result;
+        }
+
+        // 手指接触屏幕
+        document.addEventListener("touchstart", function (e) {
+            startX = e.touches[0].pageX;
+            startY = e.touches[0].pageY;
+        }, false);
+        // 手指离开屏幕
+        document.addEventListener("touchend", function (e) {
+            var endX, endY;
+            endX = e.changedTouches[0].pageX;
+            endY = e.changedTouches[0].pageY;
+            var direction = getDirection(startX, startY, endX, endY);
+            switch (direction) {
+                case 1:
+                    // console.log("向上！")
+                    scrollNextTransitionStart()
+                    break;
+                case 4:
+                    // console.log("向右！")
+                    scrollNextTransitionStart()
+                    break;
+                default:
+            }
+        }, false);
+
+        $(document).scroll(function () {
+            scrollNextTransitionStart()
+        });
+
+        $('.node').html('')
+        scrollNextTransitionStart()
     }
 
     function listPage() {
@@ -515,7 +674,7 @@ function siteJPMN5() {
             }
         }, false);
 
-        $(document).scroll(function() {
+        $(document).scroll(function () {
             scrollNextTransitionStart()
         });
     }
@@ -535,7 +694,7 @@ function siteJPMN5() {
                     });
                 }
 
-                scroll(0,0)
+                scroll(0, 0)
             }, 600);
         }
 
@@ -686,24 +845,13 @@ function main() {
         '            height: 100%;\n' +
         '            object-fit: cover;\n' +
         '        }\n';
-    if (typeof GM_addStyle != 'undefined') {
-        GM_addStyle(css);
-    } else if (typeof PRO_addStyle != 'undefined') {
-        PRO_addStyle(css);
-    } else if (typeof addStyle != 'undefined') {
-        addStyle(css);
-    } else {
-        var node = document.createElement("style");
-        node.type = "text/css";
-        node.appendChild(document.createTextNode(css));
-        var heads = document.getElementsByTagName("head");
-        if (heads.length > 0) {
-            heads[0].appendChild(node);
-        } else {
-            // no head yet, stick it whereever
-            document.documentElement.appendChild(node);
-        }
-    }
+
+    var node = document.createElement("style");
+    node.type = "text/css";
+    node.appendChild(document.createTextNode(css));
+    var heads = document.getElementsByTagName("head");
+    heads[0].appendChild(node);
+
 
     // 主程序入口，获取url判断网站类型
     let url = window.location.host;
