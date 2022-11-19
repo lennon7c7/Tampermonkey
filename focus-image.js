@@ -268,7 +268,7 @@ function siteJPMN5() {
             $('#detailSingle').hide()
         }
 
-        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
+        $('.sitenav > ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
         $(document).on('click', '#focus-image', function () {
             slideNextTransitionStart();
         });
@@ -613,7 +613,7 @@ function siteJPMN5() {
         });
 
 
-        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
+        $('.sitenav > ul').append(`<li class="menu-item"><a href="javascript:;" id="focus-image">专注看图</a></li>`)
         $(document).on('click', '#focus-image', function () {
             run();
         });
@@ -788,7 +788,7 @@ function siteJPMN5() {
         }
 
 
-        $('.sitenav ul').append(`<li class="menu-item"><a href="javascript:;" class="focus-image">专注看图</a></li>`)
+        $('.sitenav > ul').append(`<li class="menu-item"><a href="javascript:;" class="focus-image">专注看图</a></li>`)
         $(document).on('click', '.focus-image', function () {
             intoDetailSingle($(this).attr('src'));
         });
