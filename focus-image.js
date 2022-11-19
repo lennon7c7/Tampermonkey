@@ -52,11 +52,9 @@ function siteJPMN5() {
             direction: 'vertical',
             virtual: {
                 cache: false, //关闭缓存
-
             },
             grabCursor: true,
             mousewheel: true,
-            autoHeight: true, //高度随内容变化
             keyboard: {
                 enabled: true,
                 pageUpDown: true,
@@ -537,7 +535,6 @@ function siteJPMN5() {
                 spaceBetween: 0,
                 grabCursor: true,
                 mousewheel: true,
-                // autoHeight: true, //高度随内容变化
                 keyboard: {
                     enabled: true,
                     pageUpDown: true,
@@ -711,12 +708,9 @@ function siteJPMN5() {
             direction: 'vertical',
             virtual: {
                 cache: false, //关闭缓存
-
             },
-
             grabCursor: true,
             mousewheel: true,
-            autoHeight: true, //高度随内容变化
             keyboard: {
                 enabled: true,
                 pageUpDown: true,
@@ -726,6 +720,8 @@ function siteJPMN5() {
                     switch (keyboard) {
                         case keyEsc:
                             $('.mySwiper').hide()
+                            $('.container').show()
+                            $('header.header').show()
                             break;
                     }
                 },
@@ -746,7 +742,6 @@ function siteJPMN5() {
                     $('.article-header').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
                 }
                 swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
-                // console.log('pic_all: ', pic_all)
             });
             return pic_all;
         };
@@ -814,7 +809,7 @@ function main() {
     link.href = 'https://unpkg.com/swiper@8/swiper-bundle.min.css';
     document.getElementsByTagName("HEAD")[0].appendChild(link);
 
-    var css = 'html,body{position:relative;height:100%;}body{background:#eee;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;color:#000;margin:0;padding:0;}.swiper{width:100%;height:100%;}.swiper-slide{text-align:center;font-size:18px;background:black;display:-webkit-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}.swiper-slide img{display:block;height:100%;object-fit:cover;}' +
+    var css = 'html,body{position:relative;height:100%;}body{background:#eee;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;color:#000;margin:0;padding:0;}.swiper{height:100%;}.swiper-slide{text-align:center;font-size:18px;background:black;display:-webkit-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}.swiper-slide img{display:block;height:100%;object-fit:cover;}' +
         '        .mySwiperList .swiper-slide {\n' +
         '            text-align: center;\n' +
         '            font-size: 18px;\n' +
@@ -839,9 +834,6 @@ function main() {
         '\n' +
         '        .mySwiperList .swiper-slide img {\n' +
         '            display: block;\n' +
-        '            /*width: 100px;*/\n' +
-        '            /*height: 100px;*/\n' +
-        '            width: 100%;\n' +
         '            height: 100%;\n' +
         '            object-fit: cover;\n' +
         '        }\n';
