@@ -5,6 +5,8 @@
 // @author       lennon
 // @license      MIT
 // @match        https://www.jpmn5.com/*
+// @match        https://www.jpmn5.cc/*
+// @match        https://www.imn5.net/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
 // @grant        unsafeWindow
@@ -808,6 +810,137 @@ function siteJPMN5() {
     }
 }
 
+function siteIMN5() {
+    function removeShit() {
+        $('img[src$=".gif"]').remove()
+        $('.logo, .title-h2l, .sidebar, #NavTop, .focusbox, .footer').remove()
+        $('.content').css('margin-right', 'unset')
+    }
+
+    function detailPage() {
+        function intoDetailSingle(imgUrl) {
+            fullscreen()
+
+            $('body').children().each(function (index, element) {
+                if (!$(element).hasClass('swiper')) {
+                    $(element).hide()
+                }
+            });
+
+            setTimeout(function () {
+                $('.mySwiper').show();
+                if (imgUrl) {
+                    $(swiper.virtual.slides).each(function (index, element) {
+                        if ($(element).find('img').attr('src') !== imgUrl) {
+                            return
+                        }
+
+                        swiper.slideTo(index)
+                    });
+                }
+            }, 500);
+        }
+
+        var swiper
+
+        //插入
+        $('body').prepend(`<div class="swiper mySwiper" style="display: none">
+    <div class="swiper-wrapper"></div>
+    <div class="swiper-pagination"></div>
+</div>`);
+
+        swiper = new Swiper('.mySwiper', {
+            direction: 'vertical',
+            virtual: {
+                cache: false, //关闭缓存
+            },
+            grabCursor: true,
+            mousewheel: true,
+            keyboard: {
+                enabled: true,
+                pageUpDown: true,
+            },
+            on: {
+                keyPress: function (event, keyboard) {
+                    switch (keyboard) {
+                        case keyEsc:
+                            $('.mySwiper').hide()
+
+                            $('body').children().each(function (index, element) {
+                                if (!$(element).hasClass('swiper')) {
+                                    $(element).show()
+                                }
+                            });
+
+                            break;
+                    }
+                },
+            },
+            parallax: true,
+            effect: 'fade',
+        });
+
+        //获取指定页面的图片
+        let getPaginationPicUrl = function (page_url) {
+            $.get(page_url, function (data) {
+                let tempHtml = [];
+                $(data).find('.imgwebp img').each(function () {
+                    let imgSrc = $(this).attr('src')
+                    tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
+                    $('.jianjie1').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
+                });
+                swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
+            });
+        };
+
+        //列出所有图片
+        let page = $('.page').first();
+        let page_current = parseInt(page.find('.current').first().text());//判断是否是第一页
+        let page_url = '';
+        let page_url_str = '';
+        let page_num = '';
+        if (page_current === 1) {
+            page_url = page.children('a')[0]['href'];
+            page_url_str = page_url.substr(0, page_url.length - 5);
+            page_num = page.children('a').length - 1;
+        } else {
+            page_url = page.children('a')[1]['href'];
+            page_url_str = page_url.substr(0, page_url.length - 5);
+            page_num = page.children('a').length - 2;
+        }
+
+        // 获取首页图片
+        let tempHtml = [];
+        $('.imgwebp img').each(function () {
+            let imgSrc = $(this).attr('src')
+            tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
+            $('.jianjie1').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
+        });
+        swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
+
+        // 获取其他标签页的图片
+        for (let i = 1; i <= page_num; i++) {
+            let page_urls = page_url_str + "_" + i + ".html";
+            getPaginationPicUrl(page_urls);
+        }
+
+        $('.sitenav > ul').append(`<li class="menu-item"><a href="javascript:;" class="focus-image">专注看图</a></li>`)
+        $(document).on('click', '.focus-image', function () {
+            intoDetailSingle($(this).attr('src'));
+        });
+    }
+
+    removeShit()
+
+    if (location.pathname === '/') {
+        // indexPage()
+    } else if (location.pathname === '/plus/search/index.asp') {
+        // searchPage()
+    } else if ($('.jianjie1').length === 1) {
+        detailPage()
+    }
+}
+
 function main() {
     var link = window.document.createElement('link');
     link.rel = 'stylesheet';
@@ -855,6 +988,8 @@ function main() {
     let url = window.location.host;
     if (url.indexOf('jpmn5') >= 0) {
         siteJPMN5();
+    } else if (url.indexOf('imn5') >= 0) {
+        siteIMN5();
     }
 }
 
