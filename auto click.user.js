@@ -5,6 +5,7 @@
 // @author       Lennon
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
 // @match        https://goerlifaucet.com
+// @match        https://link.csdn.net/?target=*
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
@@ -15,8 +16,8 @@
 setTimeout(function () {
     if ($.inArray(location.hostname, ['www.fuyin9.com']) >= 0) {
         siteFuyin9();
-    } else if ($.inArray(location.hostname, ['goerlifaucet.com']) >= 0) {
-        siteGoerli();
+    } else if ($.inArray(location.hostname, ['link.csdn.net']) >= 0) {
+        siteCsdn();
     }
 }, 3000);
 
@@ -34,7 +35,7 @@ function siteFuyin9() {
         solution: "html",
         supplied: "mp3",
         wmode: "window",
-        ended: function() {
+        ended: function () {
             document.getElementById("next").click();
 
         }
@@ -44,13 +45,10 @@ function siteFuyin9() {
     }, 3000);
 }
 
-/**
- * 自动获取eth
- */
-function siteGoerli() {
-    setTimeout(function () {
-        let address = '0xdb378422487862250140E1aF6AeCEFA0BB59b8d8'
-        $('.alchemy-faucet-panel-input-text').val(address)
-        $('.alchemy-faucet-button').click()
-    }, 10000);
+function siteCsdn() {
+    // 自动jump
+    let link = $("a:contains('继续')").attr('href')
+    if (link) {
+        window.location.href = link
+    }
 }
