@@ -6,6 +6,7 @@
 // @license      MIT
 // @match        https://www.jpmn5.com/*
 // @match        https://www.jpmn5.cc/*
+// @match        https://www.jpmn5.top/*
 // @match        https://www.imn5.net/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
