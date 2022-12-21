@@ -8,6 +8,7 @@
 // @match        https://www.jpmn5.cc/*
 // @match        https://www.jpmn5.top/*
 // @match        https://www.imn5.net/*
+// @match        https://www.xgmn01.com/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
 // @grant        unsafeWindow
@@ -36,7 +37,7 @@ function fullscreen() {
 
 function siteJPMN5() {
     function removeShit() {
-        $('img[src="/uploadfile/zyx.gif"], img[src="https://pic.jpmn5.com/img/zz1.gif"]').remove()
+        $('img[src$=".gif"]').remove()
         $('.logo, .title-h2l, .sidebar, #NavTop, .footer').remove()
         $('.content').css('margin-right', 'unset')
     }
@@ -987,7 +988,7 @@ function main() {
 
     // 主程序入口，获取url判断网站类型
     let url = window.location.host;
-    if (url.indexOf('jpmn5') >= 0) {
+    if (url.indexOf('jpmn5') >= 0 || url.indexOf('xgmn01') >= 0) {
         siteJPMN5();
     } else if (url.indexOf('imn5') >= 0) {
         siteIMN5();
