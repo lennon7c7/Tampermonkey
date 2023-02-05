@@ -9,6 +9,7 @@
 // @match        https://www.jpmn5.top/*
 // @match        https://www.imn5.net/*
 // @match        https://www.xgmn01.com/*
+// @match        https://mrcong.com/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
 // @grant        unsafeWindow
@@ -889,7 +890,7 @@ function siteIMN5() {
                 $(data).find('.imgwebp img').each(function () {
                     let imgSrc = $(this).attr('src')
                     tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
-                    $('.jianjie1').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
+                    imgThumbnailContainer.append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
                 });
                 swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
             });
@@ -916,7 +917,7 @@ function siteIMN5() {
         $('.imgwebp img').each(function () {
             let imgSrc = $(this).attr('src')
             tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
-            $('.jianjie1').append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
+            imgThumbnailContainer.append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
         });
         swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
 
@@ -940,6 +941,116 @@ function siteIMN5() {
         // searchPage()
     } else if ($('.jianjie1').length === 1) {
         detailPage()
+    }
+}
+
+function siteMrcong() {
+    function removeShit() {
+        $('img[src$=".gif"]').remove()
+        $('#theme-header, .post-title, .post-meta, #topcontrol').remove()
+        $('#main-content, #wrapper').css('width', '100%')
+    }
+
+    function detailPage() {
+        function intoDetailSingle(imgUrl) {
+            fullscreen()
+
+            $('body').children().each(function (index, element) {
+                if (!$(element).hasClass('swiper')) {
+                    $(element).hide()
+                }
+            });
+
+            setTimeout(function () {
+                $('.mySwiper').show();
+                if (imgUrl) {
+                    $(swiper.virtual.slides).each(function (index, element) {
+                        if ($(element).find('img').attr('src') !== imgUrl) {
+                            return
+                        }
+
+                        swiper.slideTo(index)
+                    });
+                }
+            }, 500);
+        }
+
+        function getNextUrl(url) {
+            if (!url) {
+                return
+            }
+
+            $.get(url, function (data) {
+                let tagImg = 'img.aligncenter'
+                let tempHtml = [];
+                $(data).find(tagImg).each(function () {
+                    let imgSrc = $(this).attr('src')
+                    tempHtml.push(`<div class="swiper-slide"><img src="${imgSrc}" /></div>`)
+                    imgThumbnailContainer.append(`<img src="${imgSrc}" style="width: 100px;" class="focus-image">`)
+                });
+                swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
+
+                let nextUrl = ''
+                $(data).each(function () {
+                    if (!nextUrl && $(this).attr('rel') === 'next') {
+                        nextUrl = $(this).attr('href')
+                    }
+                });
+
+                if (nextUrl) {
+                    getNextUrl(nextUrl)
+                }
+            });
+        }
+
+        var imgThumbnailContainer = $('.share-post').first()
+        var swiper
+
+        // swiper container
+        $('body').prepend(`<div class="swiper mySwiper" style="display: none"><div class="swiper-wrapper"></div><div class="swiper-pagination"></div></div>`);
+
+        swiper = new Swiper('.mySwiper', {
+            direction: 'vertical',
+            virtual: {
+                cache: false, //关闭缓存
+            },
+            grabCursor: true,
+            mousewheel: true,
+            keyboard: {
+                enabled: true,
+                pageUpDown: true,
+            },
+            on: {
+                keyPress: function (event, keyboard) {
+                    switch (keyboard) {
+                        case keyEsc:
+                            $('.mySwiper').hide()
+
+                            $('body').children().each(function (index, element) {
+                                if (!$(element).hasClass('swiper')) {
+                                    $(element).show()
+                                }
+                            });
+
+                            break;
+                    }
+                },
+            },
+            parallax: true,
+            effect: 'fade',
+        });
+
+        imgThumbnailContainer.html('')
+        getNextUrl(location.href);
+
+        $(document).on('click', '.focus-image', function () {
+            intoDetailSingle($(this).attr('src'));
+        });
+    }
+
+    if ($('#disqus_thread').length === 1) {
+        detailPage()
+        removeShit()
     }
 }
 
@@ -992,6 +1103,8 @@ function main() {
         siteJPMN5();
     } else if (url.indexOf('imn5') >= 0) {
         siteIMN5();
+    } else if (url.indexOf('mrcong.com') >= 0) {
+        siteMrcong();
     }
 }
 
