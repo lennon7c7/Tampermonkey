@@ -3,6 +3,7 @@
 // @version      1.0
 // @description  click something or make some operations fast
 // @author       Lennon
+// @match        https://*.zhihu.com/*
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
@@ -14,8 +15,16 @@
 setTimeout(function () {
     if ($.inArray(location.hostname, ['www.fuyin9.com']) >= 0) {
         siteFuyin9();
+    } else if (location.hostname.search('zhihu.com') !== -1) {
+        siteZhihu();
     }
 }, 3000);
+
+function siteZhihu() {
+    $('.Modal-closeButton').click();
+    $('.css-1rgloxd').click();
+    $('.css-1ynzxqw').hide();
+}
 
 /**
  * 自动播放
