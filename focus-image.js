@@ -6,6 +6,7 @@
 // @license      MIT
 // @match        https://www.xgmn01.com/*
 // @match        https://mrcong.com/*
+// @match        https://studio.youtube.com/channel/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
 // @grant        unsafeWindow
@@ -18,6 +19,12 @@ let keyLeft = 37
 let keyUp = 38
 let keyRight = 39
 let keyDown = 40
+
+function sleep(duration) {
+    return new Promise(resolve => {
+        setTimeout(resolve, duration);
+    })
+}
 
 function fullscreen() {
     let elem = document.body;
@@ -714,6 +721,55 @@ function siteMrcong() {
     }
 }
 
+async function siteYoutube() {
+    await sleep(5000);
+
+    async function doPublish(e) {
+        console.log('click: open dialog')
+        e.click()
+        await sleep(3000);
+
+        console.log('click: 视频元素')
+        $('#next-button').click()
+        await sleep(3000);
+
+        console.log('click: 检查1')
+        $('#next-button').click()
+        await sleep(3000);
+
+        console.log('click: 检查2')
+        $('#next-button').click()
+        await sleep(3000);
+
+        console.log('click: 公开范围')
+        $('#done-button').click()
+        await sleep(10000);
+
+        console.log('click: close dialog')
+        $('div.ytcp-button:contains(关闭)').click()
+        await sleep(1000);
+    }
+
+    let editButtons = []
+    $('div.ytcp-button:contains(编辑草稿)').each(function () {
+        editButtons.push($(this))
+    });
+
+    if (editButtons.length === 0) {
+        return
+    }
+
+    $('#tabsContent').append(`<button type="button" class="l-batch-publish">发布全部草稿</button>`)
+    $(document).on('click', '.l-batch-publish', async function () {
+        console.log('start')
+        for (var i = 0, len = editButtons.length; i < len; i++) {
+            console.log('i: ', i)
+            await doPublish($('div.ytcp-button:contains(编辑草稿)').last())
+        }
+        console.log('end')
+    });
+}
+
 function main() {
     var link = window.document.createElement('link');
     link.rel = 'stylesheet';
@@ -763,6 +819,8 @@ function main() {
         siteJPMN5();
     } else if (url.indexOf('mrcong.com') >= 0) {
         siteMrcong();
+    } else if (window.location.host === 'studio.youtube.com') {
+        siteYoutube();
     }
 }
 
