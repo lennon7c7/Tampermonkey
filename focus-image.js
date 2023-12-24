@@ -7,7 +7,7 @@
 // @match        https://www.xgmn01.com/*
 // @match        https://mrcong.com/*
 // @match        https://studio.youtube.com/channel/*
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
+// @require      https://code.jquery.com/jquery-3.7.1.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
 // @grant        unsafeWindow
 // @run-at       document-end
