@@ -6,6 +6,7 @@
 // @license      MIT
 // @match        https://www.xgmn01.com/*
 // @match        https://mrcong.com/*
+// @match        https://misskon.com/*
 // @match        https://studio.youtube.com/channel/*
 // @require      https://code.jquery.com/jquery-3.7.1.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
@@ -657,13 +658,12 @@ function siteMrcong() {
                 });
                 swiper.virtual.appendSlide(tempHtml);  //插入Slide 数组
 
-                let nextUrl = ''
-                $(data).each(function () {
-                    if (!nextUrl && $(this).attr('rel') === 'next') {
-                        nextUrl = $(this).attr('href')
-                    }
-                });
+                let currentPageNumber = parseInt(jQuery('.post-page-numbers.current').first().text())
+                if (currentPageNumber < 1) {
+                    return
+                }
 
+                let nextUrl = $(data).find('.post-page-numbers.current').first().next().attr('href')
                 if (nextUrl) {
                     getNextUrl(nextUrl)
                 }
@@ -817,7 +817,7 @@ function main() {
     let url = window.location.host;
     if (url.indexOf('xgmn01.com') >= 0) {
         siteJPMN5();
-    } else if (url.indexOf('mrcong.com') >= 0) {
+    } else if (url.indexOf('mrcong.com') >= 0 || url.indexOf('misskon.com') >= 0) {
         siteMrcong();
     } else if (window.location.host === 'studio.youtube.com') {
         siteYoutube();
