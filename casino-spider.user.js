@@ -3,7 +3,7 @@
 // @version      1.0
 // @description
 // @author       Lennon
-// @match        https://www.365sb.com/*
+// @match        https://www.365-023.com/*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @run-at       document-end
@@ -23,7 +23,7 @@ async function main() {
 
     checkCaptcha()
 
-    if (location.host === 'www.365sb.com') {
+    if (location.host === 'www.365-023.com') {
         await siteBet365();
     }
 
@@ -34,6 +34,9 @@ async function main() {
  */
 async function siteBet365() {
     switch (true) {
+        case location.hash === '#/AC/B1/C1/D1002/G938/I1/Q1/F^24/' || location.hash === '#/AC/B1/C1/D1002/G938/I1/Q1/F^3/':
+            await soccerNextHours();
+            break;
         case location.hash === '#/IP/B1':
             await soccerList();
             break;
@@ -44,6 +47,37 @@ async function siteBet365() {
         default :
             console.error('no match page hash');
             break;
+    }
+}
+
+/**
+ * 足球 - 接下来3、12、24小时
+ */
+async function soccerNextHours() {
+    var elementSport = $('.cm-CouponMarketGrid').find('.suf-CompetitionMarketGroup');
+    for (var i = 0; i < elementSport.length; i++) {
+        if ($(elementSport[i]).hasClass('suf-CompetitionMarketGroup-collapsed')) {
+            $(elementSport[i]).click();
+        }
+    }
+
+    for (var i = 0; i < elementSport.length; i++) {
+        var gamename = $(elementSport[i]).find('.suf-CompetitionMarketGroupButton_Text').text();
+        // console.log(i, gamename)
+
+        var teamnames = $(elementSport[i]).find('.src-ParticipantFixtureDetailsExtraLineHigher_Team');
+        var homename
+        var guestname
+        // console.log(i, teamnames)
+        for (var j = 0; j < teamnames.length; j++) {
+            if (j === 0 || j === 3 || j === 6 || j === 9 || j === 12 || j === 15 || j === 18 || j === 21) {
+                homename = $(teamnames[j]).text()
+            } else if (j === 1 || j === 4 || j === 7 || j === 10 || j === 13 || j === 16 || j === 19 || j === 22) {
+                guestname = $(teamnames[j]).text()
+            } else {
+                console.log(i, gamename, homename, guestname)
+            }
+        }
     }
 }
 
