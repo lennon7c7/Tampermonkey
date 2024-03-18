@@ -6,6 +6,10 @@
 // @match        https://www.365-023.com/*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
+// @grant        GM_xmlhttpRequest
+// @connect      localhost
+// @connect      127.0.0.1
+// @connect      127.0.0.1:31050
 // @run-at       document-end
 // ==/UserScript==
 'use strict';
@@ -37,13 +41,13 @@ async function siteBet365() {
         case location.hash === '#/AC/B1/C1/D1002/G938/I1/Q1/F^24/' || location.hash === '#/AC/B1/C1/D1002/G938/I1/Q1/F^3/':
             await soccerNextHours();
             break;
-        case location.hash === '#/IP/B1':
-            await soccerList();
-            break;
-        case location.hash.indexOf('#/IP/EV') !== -1:
-            await soccerDetail();
-            // location.reload();
-            break;
+        // case location.hash === '#/IP/B1':
+        //     await soccerList();
+        //     break;
+        // case location.hash.indexOf('#/IP/EV') !== -1:
+        //     await soccerDetail();
+        //     location.reload();
+        //     break;
         default :
             console.error('no match page hash');
             break;
@@ -61,13 +65,13 @@ async function soccerNextHours() {
         }
     }
 
-    for (var i = 0; i < elementSport.length; i++) {
+    for (i = 0; i < elementSport.length; i++) {
         var gamename = $(elementSport[i]).find('.suf-CompetitionMarketGroupButton_Text').text();
         // console.log(i, gamename)
 
         var teamnames = $(elementSport[i]).find('.src-ParticipantFixtureDetailsExtraLineHigher_Team');
-        var homename
-        var guestname
+        var homename = ''
+        var guestname = ''
         // console.log(i, teamnames)
         for (var j = 0; j < teamnames.length; j++) {
             if (j === 0 || j === 3 || j === 6 || j === 9 || j === 12 || j === 15 || j === 18 || j === 21) {
@@ -75,7 +79,15 @@ async function soccerNextHours() {
             } else if (j === 1 || j === 4 || j === 7 || j === 10 || j === 13 || j === 16 || j === 19 || j === 22) {
                 guestname = $(teamnames[j]).text()
             } else {
-                console.log(i, gamename, homename, guestname)
+                console.debug(i, gamename, homename, guestname)
+
+                saveData({
+                    gametime: '',
+                    gamename: gamename,
+                    homename: homename,
+                    guestname: guestname,
+                    url: '',
+                });
             }
         }
     }
@@ -185,7 +197,7 @@ async function soccerDetail() {
         }
     }
 
-    await soccerDetail()
+    // await soccerDetail()
 }
 
 /**
@@ -227,65 +239,20 @@ async function soccerList() {
  * @param {object} data
  */
 function saveData(data) {
-    if (!data.competitionName) {
-        console.error('competitionName is empty');
-        return;
-    }
-    var game_name = data.competitionName;
-
-    if (!data.teamName || data.teamName.length !== 2) {
-        console.error('teamName is empty');
-        return;
-    }
-    var team1_name = data.teamName[0];
-    var team2_name = data.teamName[1];
-
-    if (!data.teamScore || data.teamScore.length !== 2) {
-        console.error('teamScore is empty');
-        return;
-    }
-    var team1_score = data.teamScore[0];
-    var team2_score = data.teamScore[1];
-
-    if (!data.odd_info) {
-        console.error('odd is empty');
-        return;
-    }
-    var odd_info = data.odd_info;
-
-    if (!data.site_id) {
-        console.error('site_id is empty');
-        return;
-    }
-    var site_id = data.site_id;
-
-    if (!data.site_name) {
-        console.error('site_name is empty');
-        return;
-    }
-    var site_name = data.site_name;
-
-    var settings = {
-        "url": "https://localhost/spider",
+    let status = GM_xmlhttpRequest({
+        "url": "http://127.0.0.1:31050/bet365-spider",
         "method": "POST",
         "timeout": 0,
         "headers": {
             "Content-Type": "application/json"
         },
-        "data": JSON.stringify({
-            "gameName": game_name,
-            "team1Name": team1_name,
-            "team1Score": team1_score,
-            "team2Name": team2_name,
-            "team2Score": team2_score,
-            "oddInfo": odd_info,
-            "siteID": site_id,
-            "siteName": site_name
-        }),
-    };
+        "data": JSON.stringify([data]),
+        onload: function (xhr) {
+            console.debug('casino-spider.user', xhr.responseText);
+        }
+    });
 
-    $.ajax(settings).done();
-
+    console.debug('status', status)
 }
 
 
@@ -324,7 +291,7 @@ function saveTimer(sport, timer) {
         setCookie(keyUrl, location.href)
     }
 
-    return;
+
 }
 
 /**
