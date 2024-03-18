@@ -91,6 +91,14 @@ async function soccerNextHours() {
             }
         }
     }
+
+    // 获取随机时间
+    const randomTime = generateRandomTime();
+
+    // 设置定时器，在随机时间后执行刷新页面操作
+    setTimeout(function () {
+        window.location.reload();
+    }, randomTime);
 }
 
 
@@ -312,6 +320,16 @@ async function listJumpToDetail() {
         sleep(3000)
         location.reload()
     }
+}
+
+// 生成 20 到 30 分钟之间的随机时间（单位：毫秒）
+function generateRandomTime() {
+    // 20 分钟的毫秒数
+    const minTime = 20 * 60 * 1000;
+    // 30 分钟的毫秒数
+    const maxTime = 30 * 60 * 1000;
+    // 生成随机时间
+    return Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
 }
 
 /**
