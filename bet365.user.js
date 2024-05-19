@@ -3,7 +3,7 @@
 // @version      1.0
 // @description
 // @author       Lennon
-// @match        https://extra.365-023.com/ResultsApi/GetResults?fixtureId=154928801&fromDate=2024-05-10&toDate=2024-05-10&competitionId=0&challengeId=0&marketOverride=&isVirtual=false&ct=42&lng=10&st=108&tz=GMTPlus8&ot=Decimals&sportName=sport&sportId=1&
+// @match        https://extra.365-023.com/ResultsApi*
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @grant        GM_xmlhttpRequest
 // @run-at       document-end
@@ -97,6 +97,73 @@ async function apiSqlExec(sql) {
         .catch((error) => console.error(error));
 }
 
+async function doUpdate() {
+    await doUpdateScheduleGroup();
+}
+
+async function doUpdateScheduleGroup() {
+    for (let i = 0; i < 1; i++) {
+        await sleep(1000);
+        let reqUrl = ''
+        let respEn = ''
+        let respCh = ''
+        let languageIDEn = '1'
+        let languageIDCh = '10'
+        let sqlExec
+
+        const urlObj = new URL('https://extra.365-023.com/ResultsApi/GetCompetitions?sportId=1&fromDate=2024-05-18&toDate=2024-05-19&lng=10');
+        const searchParamsObj = new URLSearchParams(urlObj.search);
+        searchParamsObj.set('fromDate', '2024-05-14')
+        searchParamsObj.set('toDate', '2024-05-14')
+
+        searchParamsObj.set('lng', languageIDEn)
+        reqUrl = urlObj.origin + urlObj.pathname + '?' + searchParamsObj.toString()
+        respEn = await curlGet(reqUrl)
+        if (!respEn || respEn.length === 0) {
+            console.error('empty data', reqUrl)
+            continue
+        }
+
+        searchParamsObj.set('lng', languageIDCh)
+        reqUrl = urlObj.origin + urlObj.pathname + '?' + searchParamsObj.toString()
+        respCh = await curlGet(reqUrl)
+        if (!respCh || respCh.length === 0) {
+            console.error('empty data', reqUrl)
+            continue
+        }
+
+        let schedule_groups = []
+        $.each(respEn, function (key, value) {
+            schedule_groups.push({
+                language_id: languageIDEn,
+                schedule_group_id: value.Id,
+                nickname: value.Description
+            })
+        });
+        $.each(respCh, function (key, value) {
+            schedule_groups.push({
+                language_id: languageIDCh,
+                schedule_group_id: value.Id,
+                nickname: value.Description
+            })
+        });
+
+        for (let j = 0; j < schedule_groups.length; j++) {
+            sqlExec = `
+                INSERT INTO bet365_schedule_group_nickname (language_id, schedule_group_id, nickname)
+                SELECT ${schedule_groups[j].language_id}, ${schedule_groups[j].schedule_group_id}, '${schedule_groups[j].nickname}'
+                FROM DUAL
+                WHERE NOT EXISTS(SELECT *
+                                 FROM bet365_schedule_group_nickname
+                                 WHERE language_id = ${schedule_groups[j].language_id}
+                                   AND schedule_group_id = ${schedule_groups[j].schedule_group_id}
+                                   AND nickname = '${schedule_groups[j].nickname}');
+            `
+            await apiSqlExec(sqlExec);
+        }
+    }
+}
+
 async function doUpdateScore() {
     let resp
     let sqlRaw = "SELECT * FROM bet365_info WHERE gametimestamp < unix_timestamp() - 24*60*60 AND score = '' ORDER BY gametimestamp"
@@ -149,8 +216,12 @@ async function doUpdateScore() {
 async function main() {
     console.debug('---------- start ----------');
 
-    if (location.pathname === '/ResultsApi/GetResults') {
+    if (location.pathname === '/ResultsApi') {
+        await doUpdate();
+    } else if (location.pathname === '/ResultsApi/GetResults') {
         await doUpdateScore();
+    } else if (location.pathname === '/ResultsApi/GetCompetitions') {
+        await doUpdateScheduleGroup();
     }
 
     console.debug('---------- end ----------');
