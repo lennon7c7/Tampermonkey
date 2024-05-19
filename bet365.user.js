@@ -99,6 +99,7 @@ async function apiSqlExec(sql) {
 
 async function doUpdate() {
     await doUpdateScheduleGroup();
+    await doUpdateTeam();
 }
 
 async function doUpdateScheduleGroup() {
@@ -164,6 +165,69 @@ async function doUpdateScheduleGroup() {
     }
 }
 
+async function doUpdateTeam() {
+    for (let i = 0; i < 1; i++) {
+        await sleep(1000);
+        let reqUrl = ''
+        let respEn = ''
+        let respCh = ''
+        let languageIDEn = '1'
+        let languageIDCh = '10'
+        let sqlExec
+
+        const urlObj = new URL('https://extra.365-023.com/ResultsApi/GetTeams?sportId=1&fromDate=2024-05-14&toDate=2024-05-14&ct=42&lng=1&st=108&tz=GMTPlus8&ot=Decimals');
+        const searchParamsObj = new URLSearchParams(urlObj.search);
+        searchParamsObj.set('fromDate', '2024-05-14')
+        searchParamsObj.set('toDate', '2024-05-14')
+
+        searchParamsObj.set('lng', languageIDEn)
+        reqUrl = urlObj.origin + urlObj.pathname + '?' + searchParamsObj.toString()
+        respEn = await curlGet(reqUrl)
+        if (!respEn || respEn.length === 0) {
+            console.error('empty data', reqUrl)
+            continue
+        }
+
+        searchParamsObj.set('lng', languageIDCh)
+        reqUrl = urlObj.origin + urlObj.pathname + '?' + searchParamsObj.toString()
+        respCh = await curlGet(reqUrl)
+        if (!respCh || respCh.length === 0) {
+            console.error('empty data', reqUrl)
+            continue
+        }
+
+        let teams = []
+        $.each(respEn, function (key, value) {
+            teams.push({
+                language_id: languageIDEn,
+                team_id: value.TeamId,
+                nickname: value.TeamName
+            })
+        });
+        $.each(respCh, function (key, value) {
+            teams.push({
+                language_id: languageIDCh,
+                team_id: value.TeamId,
+                nickname: value.TeamName
+            })
+        });
+
+        for (let j = 0; j < teams.length; j++) {
+            sqlExec = `
+                INSERT INTO bet365_team_nickname (language_id, team_id, nickname)
+                SELECT ${teams[j].language_id}, ${teams[j].team_id}, '${teams[j].nickname}'
+                FROM DUAL
+                WHERE NOT EXISTS(SELECT *
+                                 FROM bet365_team_nickname
+                                 WHERE language_id = ${teams[j].language_id}
+                                   AND team_id = ${teams[j].team_id}
+                                   AND nickname = '${teams[j].nickname}');
+            `
+            await apiSqlExec(sqlExec);
+        }
+    }
+}
+
 async function doUpdateScore() {
     let resp
     let sqlRaw = "SELECT * FROM bet365_info WHERE gametimestamp < unix_timestamp() - 24*60*60 AND score = '' ORDER BY gametimestamp"
@@ -218,10 +282,12 @@ async function main() {
 
     if (location.pathname === '/ResultsApi') {
         await doUpdate();
-    } else if (location.pathname === '/ResultsApi/GetResults') {
-        await doUpdateScore();
     } else if (location.pathname === '/ResultsApi/GetCompetitions') {
         await doUpdateScheduleGroup();
+    } else if (location.pathname === '/ResultsApi/GetTeams') {
+        await doUpdateTeam();
+    } else if (location.pathname === '/ResultsApi/GetResults') {
+        await doUpdateScore();
     }
 
     console.debug('---------- end ----------');
