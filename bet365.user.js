@@ -54,6 +54,15 @@ function timestamp2Gametime(timestamp) {
     return oYear + '-' + setZeroFill(oMonth) + '-' + setZeroFill(oDay) + ' ' + setZeroFill(oHour) + ':' + setZeroFill(oMin);
 }
 
+/**
+ * 单双引号进行转义
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeQuotes(str) {
+    return str.replace(/(['"])/g, "\\$1");
+}
+
 async function curlGet(reqUrl) {
     return await fetch(reqUrl)
         .then((response) => response.json())
@@ -190,13 +199,13 @@ async function doUpdateScheduleGroup(startDate) {
         for (let j = 0; j < schedule_groups.length; j++) {
             sqlExec = `
                 INSERT INTO bet365_schedule_group_nickname (language_id, schedule_group_id, nickname)
-                SELECT ${schedule_groups[j].language_id}, ${schedule_groups[j].schedule_group_id}, '${schedule_groups[j].nickname}'
+                SELECT ${schedule_groups[j].language_id}, ${schedule_groups[j].schedule_group_id}, '${escapeQuotes(schedule_groups[j].nickname)}'
                 FROM DUAL
                 WHERE NOT EXISTS(SELECT *
                                  FROM bet365_schedule_group_nickname
                                  WHERE language_id = ${schedule_groups[j].language_id}
                                    AND schedule_group_id = ${schedule_groups[j].schedule_group_id}
-                                   AND nickname = '${schedule_groups[j].nickname}');
+                                   AND nickname = '${escapeQuotes(schedule_groups[j].nickname)}');
             `
             await apiSqlExec(sqlExec);
         }
@@ -253,13 +262,13 @@ async function doUpdateTeam(startDate) {
         for (let j = 0; j < teams.length; j++) {
             sqlExec = `
                 INSERT INTO bet365_team_nickname (language_id, team_id, nickname)
-                SELECT ${teams[j].language_id}, ${teams[j].team_id}, '${teams[j].nickname}'
+                SELECT ${teams[j].language_id}, ${teams[j].team_id}, '${escapeQuotes(teams[j].nickname)}'
                 FROM DUAL
                 WHERE NOT EXISTS(SELECT *
                                  FROM bet365_team_nickname
                                  WHERE language_id = ${teams[j].language_id}
                                    AND team_id = ${teams[j].team_id}
-                                   AND nickname = '${teams[j].nickname}');
+                                   AND nickname = '${escapeQuotes(teams[j].nickname)}');
             `
             await apiSqlExec(sqlExec);
         }
@@ -339,7 +348,7 @@ async function doUpdateGame(startDate) {
             sqlRaw = `SELECT *
                       FROM bet365_team_nickname
                       WHERE language_id = ${languageIDCh}
-                        AND nickname = '${games[j].homename}' LIMIT 1`
+                        AND nickname = '${escapeQuotes(games[j].homename)}' LIMIT 1`
             resp = await apiSqlRaw(sqlRaw)
             if (resp && resp.length > 0) {
                 homeid = resp[0].team_id
@@ -349,7 +358,7 @@ async function doUpdateGame(startDate) {
             sqlRaw = `SELECT *
                       FROM bet365_team_nickname
                       WHERE language_id = ${languageIDCh}
-                        AND nickname = '${games[j].homename}' LIMIT 1`
+                        AND nickname = '${escapeQuotes(games[j].homename)}' LIMIT 1`
             resp = await apiSqlRaw(sqlRaw)
             if (resp && resp.length > 0) {
                 guestid = resp[0].team_id
@@ -364,9 +373,9 @@ async function doUpdateGame(startDate) {
                        ${games[j].classid},
                        '${gamename}',
                        ${homeid},
-                       '${games[j].homename}',
+                       '${escapeQuotes(games[j].homename)}',
                        ${guestid},
-                       '${games[j].guestname}',
+                       '${escapeQuotes(games[j].homename)}',
                        '',
                        ''
                 FROM DUAL
