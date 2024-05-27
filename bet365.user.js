@@ -358,7 +358,7 @@ async function doUpdateGame(startDate) {
             sqlRaw = `SELECT *
                       FROM bet365_team_nickname
                       WHERE language_id = ${languageIDCh}
-                        AND nickname = '${escapeQuotes(games[j].homename)}' LIMIT 1`
+                        AND nickname = '${escapeQuotes(games[j].guestname)}' LIMIT 1`
             resp = await apiSqlRaw(sqlRaw)
             if (resp && resp.length > 0) {
                 guestid = resp[0].team_id
@@ -375,7 +375,7 @@ async function doUpdateGame(startDate) {
                        ${homeid},
                        '${escapeQuotes(games[j].homename)}',
                        ${guestid},
-                       '${escapeQuotes(games[j].homename)}',
+                       '${escapeQuotes(games[j].guestname)}',
                        '',
                        ''
                 FROM DUAL
