@@ -4,6 +4,7 @@
 // @namespace    Lennon Scripts
 // @match        https://link.csdn.net/?target=*
 // @match        https://link.zhihu.com/?target=*
+// @match        https://docs.qq.com/scenario/link.html?url=*
 // @match        https://www.youtube.com/*
 // @grant        Any
 // @version      1.0
@@ -13,7 +14,10 @@
 'use strict';
 
 const params = new URLSearchParams(window.location.search)
-const paramTarget = params.get('target')
+let paramTarget = params.get('target')
+if (!paramTarget) {
+    paramTarget = params.get('url')
+}
 
 switch (location.hostname) {
     case 'link.csdn.net':
@@ -24,6 +28,9 @@ switch (location.hostname) {
         break;
     case 'www.youtube.com':
         siteYoutube();
+        break;
+    case 'docs.qq.com':
+        siteDocsQq();
         break;
 }
 
@@ -48,4 +55,11 @@ function siteYoutube() {
         'data': '2',
         'creation': Date.now(),
     }));
+}
+
+function siteDocsQq() {
+    // auto jump
+    if (paramTarget) {
+        window.location.href = paramTarget
+    }
 }
