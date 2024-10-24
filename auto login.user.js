@@ -12,6 +12,7 @@
 // @match        *.youbo.mesio.cn/*
 // @match        *localhost/*
 // @match        https://git1.maoshi.ltd/users/sign_in
+// @match        https://advertiser.cheetahgo.cmcm.com/login/login
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @run-at       document-end
 // @icon         http://icons.iconarchive.com/icons/iconshock/cms/128/user-login-icon.png
@@ -29,8 +30,21 @@ setTimeout(function () {
         site163mail();
     } else if ($.inArray(location.hostname, ['git1.maoshi.ltd']) >= 0) {
         siteGitlab();
+    } else if ($.inArray(location.hostname, ['advertiser.cheetahgo.cmcm.com']) >= 0) {
+        siteCheetahgo();
     }
 }, 2000);
+
+function siteCheetahgo() {
+    var elementUsername = $('#cellphone');
+    var elementPassword = $('#password');
+    var elementButton = $('.submit-btn');
+    if (!elementUsername.val() || !elementPassword.val() || !elementButton.length) {
+        return false;
+    }
+
+    elementButton.click();
+}
 
 function siteGitlab() {
     var elementUsername = $('#user_login');
