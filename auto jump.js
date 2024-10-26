@@ -2,7 +2,7 @@
 // @name         auto jump
 // @description  jump something or make some operations fast
 // @namespace    Lennon Scripts
-// @match        https://link.csdn.net/?target=*
+// @match        https://link.csdn.net/*
 // @match        https://link.zhihu.com/?target=*
 // @match        https://docs.qq.com/scenario/link.html?url=*
 // @match        https://www.youtube.com/*
