@@ -7105,17 +7105,6 @@ let countryData = {
 }
 let orderData = null;
 
-const myRender = (template, person) => {
-    let reg = /{{(.*?)}}/g
-
-    let res = template.replace(reg, (item, key) => {
-        console.log(key, item)
-        return person[key]
-    })
-
-    return res
-}
-
 function whatsappSendConfirmed() {
     if (!orderData) {
         return
@@ -7126,13 +7115,15 @@ function whatsappSendConfirmed() {
     orderData.order.shipping_address.city = !orderData.order.shipping_address.city ? '' : orderData.order.shipping_address.city
     orderData.order.shipping_address.province = !orderData.order.shipping_address.province ? '' : orderData.order.shipping_address.province
     orderData.order.shipping_address.country = !orderData.order.shipping_address.country ? '' : orderData.order.shipping_address.country
-    let textItem = ''
-    for (var i = 0, len = orderData.order.line_items.length; i < len; i++) {
-        textItem += `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].fulfillable_quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount} \n`
+    let textItem = []
+    for (let i = 0, len = orderData.order.line_items.length; i < len; i++) {
+        textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].fulfillable_quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
     }
+    textItem = textItem.join('\n')
+
     let textPhone = orderData.order.shipping_address.phone
     if (orderData.order.shipping_address.phone[0] !== '+') {
-        for (var i = 0, len = countryData.data.countries.length; i < len; i++) {
+        for (let i = 0, len = countryData.data.countries.length; i < len; i++) {
             if (countryData.data.countries[i].code === orderData.order.shipping_address.country_code) {
                 textPhone = `${countryData.data.countries[i].phoneNumberPrefix}${orderData.order.shipping_address.phone}`
                 break
@@ -7140,7 +7131,6 @@ function whatsappSendConfirmed() {
         }
     }
     let text = `👋 Good day, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}, Order ${orderData.order.name} confirmed
-
 Thank you for your purchase! We're getting your order ready to be shipped. We will notify you when it has been sent
 
 Item: ${textItem}
@@ -7171,41 +7161,11 @@ function site127() {
         let shopifyAPI = `https://admin.shopify.com/store/${store_key}/admin/api/2024-01/orders/${order_id}.json`
         $.get(shopifyAPI, function (resp) {
             orderData = resp
-        });
 
-
-        // $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<div class="Polaris-ActionMenu-SecondaryAction"><button id="ButtonSpeedaf" class="Polaris-Button Polaris-Button--pressable Polaris-Button--variantSecondary Polaris-Button--sizeMedium Polaris-Button--textAlignCenter" type="button"><span class="Polaris-Text--root Polaris-Text--bodySm Polaris-Text--medium">速达非国际小包录入</span></button></div>`);
-        //
-        // // 打开iframe的函数
-        // $('body').on('click', '#ButtonSpeedaf', function () {
-        //     let targetUrl = `http://192.168.31.222:31050/static/speedaf_form.html?store_key=${store_key}&order_id=${order_id}`
-        //
-        //     targetUrl += `&customOrderNo=${orderData.order.name}`
-        //     targetUrl += `&codFee=${orderData.order.current_total_price_set.shop_money.amount}`
-        //     targetUrl += `&currency_code=${orderData.order.current_total_price_set.shop_money.currency_code}`
-        //
-        //     targetUrl += `&acceptName=${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}`
-        //     if (orderData.order.shipping_address.address1 && orderData.order.shipping_address.address2) {
-        //         targetUrl += `&acceptAddress=${orderData.order.shipping_address.address1} ${orderData.order.shipping_address.address2}`
-        //     } else if (orderData.order.shipping_address.address1) {
-        //         targetUrl += `&acceptAddress=${orderData.order.shipping_address.address1}`
-        //     }
-        //
-        //     targetUrl += `&acceptCountryCode=${orderData.order.shipping_address.country_code}`
-        //     targetUrl += `&acceptCountryName=${orderData.order.shipping_address.country}`
-        //     targetUrl += `&acceptProvinceName=${orderData.order.shipping_address.province}`
-        //     targetUrl += `&acceptCityName=${orderData.order.shipping_address.city}`
-        //     targetUrl += `&acceptMobile=${orderData.order.shipping_address.phone}`
-        //     targetUrl += `&acceptPostCode=${orderData.order.shipping_address.zip}`
-        //
-        //     targetUrl += `&expressOrderGoodsList=${JSON.stringify(orderData.order.line_items)}`
-        //
-        //     window.open(targetUrl, '_blank');
-        // });
-
-        $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<div id="whatsappSendConfirmed" class="Polaris-ActionMenu-SecondaryAction"><button class="Polaris-Button Polaris-Button--pressable Polaris-Button--variantSecondary Polaris-Button--sizeMedium Polaris-Button--textAlignCenter" type="button">WhatsApp发消息 确认地址</button></div>`);
-        $('body').on('click', '#whatsappSendConfirmed', function () {
-            whatsappSendConfirmed()
+            $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<div id="whatsappSendConfirmed" class="Polaris-ActionMenu-SecondaryAction"><button class="Polaris-Button Polaris-Button--pressable Polaris-Button--variantSecondary Polaris-Button--sizeMedium Polaris-Button--textAlignCenter" type="button">WhatsApp发消息 确认地址</button></div>`);
+            $('body').on('click', '#whatsappSendConfirmed', function () {
+                whatsappSendConfirmed()
+            });
         });
     }
 }
