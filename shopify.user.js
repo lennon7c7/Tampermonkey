@@ -7111,12 +7111,15 @@ function whatsappSendConfirmed() {
     }
 
     orderData.order.shipping_address.address1 = !orderData.order.shipping_address.address1 ? '' : orderData.order.shipping_address.address1
+    orderData.order.shipping_address.address1 = orderData.order.shipping_address.address1.replaceAll('&', 'and')
     orderData.order.shipping_address.address2 = !orderData.order.shipping_address.address2 ? '' : orderData.order.shipping_address.address2
+    orderData.order.shipping_address.address2 = orderData.order.shipping_address.address2.replaceAll('&', 'and')
     orderData.order.shipping_address.city = !orderData.order.shipping_address.city ? '' : orderData.order.shipping_address.city
     orderData.order.shipping_address.province = !orderData.order.shipping_address.province ? '' : orderData.order.shipping_address.province
     orderData.order.shipping_address.country = !orderData.order.shipping_address.country ? '' : orderData.order.shipping_address.country
     let textItem = []
     for (let i = 0, len = orderData.order.line_items.length; i < len; i++) {
+        orderData.order.line_items[i].name = orderData.order.line_items[i].name.replaceAll('&', 'and')
         textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].fulfillable_quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
     }
     textItem = textItem.join('\n')
@@ -7130,8 +7133,8 @@ function whatsappSendConfirmed() {
             }
         }
     }
-    let text = `👋 Good day, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}, Order ${orderData.order.name} confirmed
-Thank you for your purchase! We're getting your order ready to be shipped. We will notify you when it has been sent
+    let text = `Order ${orderData.order.name} confirmed
+👋 Good day, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}, Thank you for your purchase! We're getting your order ready to be shipped. We will notify you when it has been sent
 
 Item: ${textItem}
 Shipping address: ${orderData.order.shipping_address.address1} ${orderData.order.shipping_address.address2} ${orderData.order.shipping_address.city} ${orderData.order.shipping_address.province} ${orderData.order.shipping_address.country}
