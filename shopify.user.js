@@ -7108,10 +7108,10 @@ let orderData = null;
 function extractDomain(url) {
     try {
         const urlObj = new URL(url); // 解析 URL
-        return `${urlObj.protocol}//${urlObj.hostname}`; // 拼接协议和主机名
+        return `${urlObj.hostname}`; // 拼接协议和主机名
     } catch (error) {
         console.error('Invalid URL:', error);
-        return null; // 如果 URL 无效，返回 null
+        return '';
     }
 }
 
@@ -7130,7 +7130,7 @@ function whatsappSendConfirmed() {
     let textItem = []
     for (let i = 0, len = orderData.order.line_items.length; i < len; i++) {
         orderData.order.line_items[i].name = orderData.order.line_items[i].name.replaceAll('&', 'and')
-        textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].fulfillable_quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
+        textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
     }
     textItem = textItem.join('\n')
 
@@ -7147,12 +7147,12 @@ function whatsappSendConfirmed() {
     let textLandingSite = ''
     if (orderData.order.landing_site && orderData.order.order_status_url) {
         // orderData.order.landing_site 去掉问号后面的参数
-        orderData.order.landing_site = orderData.order.landing_site.split('?')[0]
+        let landing_site = orderData.order.landing_site.split('?')[0]
         // orderData.order.order_status_url 去掉域名后面的参数，只保留域名
-        orderData.order.order_status_url = extractDomain(orderData.order.order_status_url)
-        if (orderData.order.order_status_url) {
+        let order_status_url = extractDomain(orderData.order.order_status_url)
+        if (order_status_url) {
             // 把 landing_site 和 order_status_url 拼接起来，组合成 https://ilovesupermarket.com/products/laser-level-line-tool🛠️🛠️
-            textLandingSite = `Landing site: ${orderData.order.order_status_url}${orderData.order.landing_site}\n`
+            textLandingSite = `Landing site: ${order_status_url}${landing_site}\n`
         }
     }
 
@@ -7175,6 +7175,58 @@ Looking forward to hearing from you!`
     // window.open(targetUrl, '_blank');
 }
 
+function whatsappSendNotPickUp() {
+    if (!orderData) {
+        return
+    }
+
+    orderData.order.shipping_address.address1 = !orderData.order.shipping_address.address1 ? '' : orderData.order.shipping_address.address1
+    orderData.order.shipping_address.address1 = orderData.order.shipping_address.address1.replaceAll('&', 'and')
+    orderData.order.shipping_address.address2 = !orderData.order.shipping_address.address2 ? '' : orderData.order.shipping_address.address2
+    orderData.order.shipping_address.address2 = orderData.order.shipping_address.address2.replaceAll('&', 'and')
+    orderData.order.shipping_address.city = !orderData.order.shipping_address.city ? '' : orderData.order.shipping_address.city
+    orderData.order.shipping_address.province = !orderData.order.shipping_address.province ? '' : orderData.order.shipping_address.province
+    orderData.order.shipping_address.country = !orderData.order.shipping_address.country ? '' : orderData.order.shipping_address.country
+    let textItem = []
+    for (let i = 0, len = orderData.order.line_items.length; i < len; i++) {
+        orderData.order.line_items[i].name = orderData.order.line_items[i].name.replaceAll('&', 'and')
+        textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
+    }
+    textItem = textItem.join('\n')
+
+    let textPhone = orderData.order.shipping_address.phone
+    if (orderData.order.shipping_address.phone[0] !== '+') {
+        for (let i = 0, len = countryData.data.countries.length; i < len; i++) {
+            if (countryData.data.countries[i].code === orderData.order.shipping_address.country_code) {
+                textPhone = `${countryData.data.countries[i].phoneNumberPrefix}${orderData.order.shipping_address.phone}`
+                break
+            }
+        }
+    }
+
+    let textDomain = extractDomain(orderData.order.order_status_url)
+
+    let text = `Order ${orderData.order.name} not pick up
+🙏Hi, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}
+This is a friendly reminder that your order is ready for pick-up. Please be sure to collect it as soon as possible to avoid any delays or storage fees.
+If you need any assistance or have any questions regarding the pick-up process, feel free to reach out to us. 
+KE: +254 741000666 / 741000888
+
+Item: ${textItem}
+Total: ${orderData.order.current_total_price_set.shop_money.currency_code} ${orderData.order.current_total_price_set.shop_money.amount}
+
+We look forward to your visit ${textDomain}`
+    text = text.replaceAll('\n', '%0a')
+
+    let targetUrl = `https://web.whatsapp.com/send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
+    // targetUrl = `whatsapp://send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
+    // targetUrl = `https://web.whatsapp.com/send/?phone=8618607714327&text=${text}&type=phone_number&app_absent=0`
+
+    $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<a href="${targetUrl}" target="_blank">WS未签收</a>`);
+
+    // window.open(targetUrl, '_blank');
+}
+
 function site127() {
     // 获取当前 URL
     const url = window.location.href;
@@ -7192,6 +7244,7 @@ function site127() {
             orderData = resp
 
             whatsappSendConfirmed()
+            whatsappSendNotPickUp()
         });
     }
 }
