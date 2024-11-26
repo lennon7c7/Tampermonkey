@@ -7167,9 +7167,12 @@ Looking forward to hearing from you!`
     text = text.replaceAll('\n', '%0a')
 
     let targetUrl = `https://web.whatsapp.com/send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
+    // targetUrl = `whatsapp://send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
     // targetUrl = `https://web.whatsapp.com/send/?phone=8618607714327&text=${text}&type=phone_number&app_absent=0`
 
-    window.open(targetUrl, '_blank');
+    $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<a href="${targetUrl}" target="_blank">WS确认地址</a>`);
+
+    // window.open(targetUrl, '_blank');
 }
 
 function site127() {
@@ -7187,11 +7190,6 @@ function site127() {
         let shopifyAPI = `https://admin.shopify.com/store/${store_key}/admin/api/2024-01/orders/${order_id}.json`
         $.get(shopifyAPI, function (resp) {
             orderData = resp
-
-            $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<div id="whatsappSendConfirmed" class="Polaris-ActionMenu-SecondaryAction"><button class="Polaris-Button Polaris-Button--pressable Polaris-Button--variantSecondary Polaris-Button--sizeMedium Polaris-Button--textAlignCenter" type="button">WhatsApp发消息 确认地址</button></div>`);
-            $('body').on('click', '#whatsappSendConfirmed', function () {
-                whatsappSendConfirmed()
-            });
 
             whatsappSendConfirmed()
         });
