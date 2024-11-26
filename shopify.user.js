@@ -7105,6 +7105,16 @@ let countryData = {
 }
 let orderData = null;
 
+function extractDomain(url) {
+    try {
+        const urlObj = new URL(url); // 解析 URL
+        return `${urlObj.protocol}//${urlObj.hostname}`; // 拼接协议和主机名
+    } catch (error) {
+        console.error('Invalid URL:', error);
+        return null; // 如果 URL 无效，返回 null
+    }
+}
+
 function whatsappSendConfirmed() {
     if (!orderData) {
         return
@@ -7133,13 +7143,26 @@ function whatsappSendConfirmed() {
             }
         }
     }
+
+    let textLandingSite = ''
+    if (orderData.order.landing_site && orderData.order.order_status_url) {
+        // orderData.order.landing_site 去掉问号后面的参数
+        orderData.order.landing_site = orderData.order.landing_site.split('?')[0]
+        // orderData.order.order_status_url 去掉域名后面的参数，只保留域名
+        orderData.order.order_status_url = extractDomain(orderData.order.order_status_url)
+        if (orderData.order.order_status_url) {
+            // 把 landing_site 和 order_status_url 拼接起来，组合成 https://ilovesupermarket.com/products/laser-level-line-tool🛠️🛠️
+            textLandingSite = `Landing site: ${orderData.order.order_status_url}${orderData.order.landing_site}\n`
+        }
+    }
+
     let text = `Order ${orderData.order.name} confirmed
 👋 Good day, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}, Thank you for your purchase! We're getting your order ready to be shipped. We will notify you when it has been sent
 
 Item: ${textItem}
 Shipping address: ${orderData.order.shipping_address.address1} ${orderData.order.shipping_address.address2} ${orderData.order.shipping_address.city} ${orderData.order.shipping_address.province} ${orderData.order.shipping_address.country}
 Total: ${orderData.order.current_total_price_set.shop_money.currency_code} ${orderData.order.current_total_price_set.shop_money.amount}
-
+${textLandingSite}
 Looking forward to hearing from you!`
     text = text.replaceAll('\n', '%0a')
 
@@ -7169,6 +7192,8 @@ function site127() {
             $('body').on('click', '#whatsappSendConfirmed', function () {
                 whatsappSendConfirmed()
             });
+
+            whatsappSendConfirmed()
         });
     }
 }
