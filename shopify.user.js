@@ -7175,6 +7175,55 @@ Looking forward to hearing from you!`
     // window.open(targetUrl, '_blank');
 }
 
+function whatsappSendShipped() {
+    if (!orderData) {
+        return
+    }
+
+    orderData.order.shipping_address.address1 = !orderData.order.shipping_address.address1 ? '' : orderData.order.shipping_address.address1
+    orderData.order.shipping_address.address1 = orderData.order.shipping_address.address1.replaceAll('&', 'and')
+    orderData.order.shipping_address.address2 = !orderData.order.shipping_address.address2 ? '' : orderData.order.shipping_address.address2
+    orderData.order.shipping_address.address2 = orderData.order.shipping_address.address2.replaceAll('&', 'and')
+    orderData.order.shipping_address.city = !orderData.order.shipping_address.city ? '' : orderData.order.shipping_address.city
+    orderData.order.shipping_address.province = !orderData.order.shipping_address.province ? '' : orderData.order.shipping_address.province
+    orderData.order.shipping_address.country = !orderData.order.shipping_address.country ? '' : orderData.order.shipping_address.country
+    let textItem = []
+    for (let i = 0, len = orderData.order.line_items.length; i < len; i++) {
+        orderData.order.line_items[i].name = orderData.order.line_items[i].name.replaceAll('&', 'and')
+        textItem[i] = `${orderData.order.line_items[i].name} x ${orderData.order.line_items[i].quantity} ${orderData.order.line_items[i].price_set.shop_money.currency_code}${orderData.order.line_items[i].price_set.shop_money.amount}`
+    }
+    textItem = textItem.join('\n')
+
+    let textPhone = orderData.order.shipping_address.phone
+    if (orderData.order.shipping_address.phone[0] !== '+') {
+        for (let i = 0, len = countryData.data.countries.length; i < len; i++) {
+            if (countryData.data.countries[i].code === orderData.order.shipping_address.country_code) {
+                textPhone = `${countryData.data.countries[i].phoneNumberPrefix}${orderData.order.shipping_address.phone}`
+                break
+            }
+        }
+    }
+
+    let textDomain = extractDomain(orderData.order.order_status_url)
+
+    let text = `Order ${orderData.order.name} is on the way
+✈️📦Your order is on the way. Track your shipment to see the delivery status
+
+Item: ${textItem}
+Tracking number: : ${orderData.order.fulfillments[0].tracking_number}
+
+Thank you for shopping with ${textDomain}`
+    text = text.replaceAll('\n', '%0a')
+
+    let targetUrl = `https://web.whatsapp.com/send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
+    // targetUrl = `whatsapp://send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
+    // targetUrl = `https://web.whatsapp.com/send/?phone=8618607714327&text=${text}&type=phone_number&app_absent=0`
+
+    $('.Polaris-ActionMenu-Actions__ActionsLayout').prepend(`<a href="${targetUrl}" target="_blank">WS已发货</a>`);
+
+    // window.open(targetUrl, '_blank');
+}
+
 function whatsappSendNotPickUp() {
     if (!orderData) {
         return
@@ -7209,13 +7258,11 @@ function whatsappSendNotPickUp() {
     let text = `Order ${orderData.order.name} not pick up
 🙏Hi, ${orderData.order.shipping_address.last_name} ${orderData.order.shipping_address.first_name}
 This is a friendly reminder that your order is ready for pick-up. Please be sure to collect it as soon as possible to avoid any delays or storage fees.
-If you need any assistance or have any questions regarding the pick-up process, feel free to reach out to us. 
+If you need any assistance or have any questions regarding the pick-up process, feel free to reach out to ${textDomain} 
 KE: +254 741000666 / 741000888
 
 Item: ${textItem}
-Total: ${orderData.order.current_total_price_set.shop_money.currency_code} ${orderData.order.current_total_price_set.shop_money.amount}
-
-We look forward to your visit ${textDomain}`
+Total: ${orderData.order.current_total_price_set.shop_money.currency_code} ${orderData.order.current_total_price_set.shop_money.amount}`
     text = text.replaceAll('\n', '%0a')
 
     let targetUrl = `https://web.whatsapp.com/send/?phone=${textPhone}&text=${text}&type=phone_number&app_absent=0`
@@ -7244,6 +7291,7 @@ function site127() {
             orderData = resp
 
             whatsappSendConfirmed()
+            whatsappSendShipped()
             whatsappSendNotPickUp()
         });
     }
