@@ -1536,6 +1536,11 @@ function whatsappSendShipped() {
     }
     textItem = textItem.join('\n')
 
+    let textTrackingNumber = ''
+    if (orderData.order.fulfillments.length > 0 && orderData.order.fulfillments[0].tracking_number) {
+        textTrackingNumber = `Tracking number: ${orderData.order.fulfillments[0].tracking_number}`
+    }
+
     let textPhone = orderData.order.shipping_address.phone
     if (orderData.order.shipping_address.phone[0] !== '+') {
         for (let i = 0, len = countryData.length; i < len; i++) {
@@ -1560,7 +1565,7 @@ function whatsappSendShipped() {
 📦Your order is on the way. Track your shipment to see the delivery status
 
 Item: ${textItem}
-Tracking number: : ${orderData.order.fulfillments[0].tracking_number}
+${textTrackingNumber}
 ${textDeliveryPhone}
 
 Thank you for shopping with ${textDomain}`
