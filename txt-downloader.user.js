@@ -518,11 +518,12 @@ async function siteBiquge(novelUrl) {
     if (!novelUrl) {
         return;
     }
+    await sleep(2000);
 
-    location.pathname.split('/').forEach((val, index) => {
-        if (index === 2) {
+    novelUrl.split('/').forEach((val, index) => {
+        if (index === 4) {
             novelBookid = val;
-        } else if (index === 3) {
+        } else if (index === 5) {
             novelChapterid = val.replace('.html', '').trim();
         }
     });
@@ -871,6 +872,12 @@ async function main() {
     }
 
     console.debug('---------- end ----------');
+}
+
+function sleep(duration) {
+    return new Promise(resolve => {
+        setTimeout(resolve, duration);
+    })
 }
 
 main()
