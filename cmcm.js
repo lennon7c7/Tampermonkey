@@ -16,6 +16,7 @@ let pageIndexData = [];
 let minDailyMoney = 2;
 let maxDailyMoney = 10;
 let currentDomainKey = 0;
+let companyName = '深圳市顺风顺水科技有限公司';
 let domainArr = $.trim(`
 resumerefine.top
 promptwizard.top
@@ -27,9 +28,7 @@ promptpic.cloud
 adcrafted.org
 backdropswap.org
 colorsize.org
-`)
-domainArr = domainArr.split("\n");
-
+`).split("\n");
 let idArr = $.trim(`
 1619540982244697
 1619540982244698
@@ -41,8 +40,59 @@ let idArr = $.trim(`
 1619540982244704
 1619540982244705
 1619540982244706
-`)
-idArr = idArr.split("\n");
+`).split("\n");
+
+companyName = '深圳市蓓赫科技有限公司';
+domainArr = $.trim(`
+neonpunkartgenerator.com
+expertenglishtranslations.com
+interviewmasterpro.com
+musicsprite.com
+melodyprompt.com
+caloriedetect.com
+fitjourneyplanner.com
+speechcraftgen.com
+mathsolvehub.com
+chatbothaven.com
+`).split("\n");
+idArr = $.trim(`
+1619540982244707
+1619540982244708
+1619540982244709
+1619540982244710
+1619540982244711
+1619540982244712
+1619540982244713
+1619540982244714
+1619540982244715
+1619540982244716
+`).split("\n");
+
+companyName = '深圳白羽千翎科技有限公司';
+domainArr = $.trim(`
+vectorprompt.cc
+cryptonotes.cc
+aiwriterhub.cc
+lyricgenie.cc
+blessinggenie.cc
+postpartummeals.cc
+planai.cc
+lyriccomposer.cc
+lyricgenius.cc
+iamchefextraordinaire.cc
+`).split("\n");
+idArr = $.trim(`
+1619540982244717
+1619540982244718
+1619540982244719
+1619540982244720
+1619540982244721
+1619540982244722
+1619540982244723
+1619540982244724
+1619540982244725
+1619540982244726
+`).split("\n");
 
 function generateRandomMoney() {
     // 生成最小值为 x，最大值为 y 的随机数
@@ -79,7 +129,7 @@ function formatDate() {
 }
 
 function pageIndex() {
-    $('span.etctitle').first().text('深圳市顺风顺水科技有限公司')
+    $('span.etctitle').first().text(companyName)
     $('span.userinfo-id').first().text('ID:' + Date.now())
     $('.ant-statistic-content-value-int').eq(1).text('10')
     $('span.ant-select-selection-item[title="昨天"]').text('近7天')
