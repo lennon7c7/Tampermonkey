@@ -13,10 +13,12 @@
 console.log('init', new Date())
 
 let pageIndexData = [];
-let minDailyMoney = 2;
-let maxDailyMoney = 10;
+let minDailyMoney = 50;
+let maxDailyMoney = 100;
 let currentDomainKey = 0;
 let companyName = '深圳市顺风顺水科技有限公司';
+// 随机生成的，无实际意义
+let companyId = '1739065024005';
 let domainArr = $.trim(`
 resumerefine.top
 promptwizard.top
@@ -41,8 +43,14 @@ let idArr = $.trim(`
 1619540982244705
 1619540982244706
 `).split("\n");
+let domainMoneyArr = {};
 
+/**
+ * 部分已推广
+ * @type {string}
+ */
 companyName = '深圳市蓓赫科技有限公司';
+companyId = '53112444'
 domainArr = $.trim(`
 neonpunkartgenerator.com
 expertenglishtranslations.com
@@ -67,8 +75,17 @@ idArr = $.trim(`
 1619540982244715
 1619540982244716
 `).split("\n");
+domainMoneyArr = {
+    'speechcraftgen.com': 500,
+    'mathsolvehub.com': 1400,
+    'neonpunkartgenerator.com': 191000,
+    'expertenglishtranslations.com': 228000,
+    'interviewmasterpro.com': 96000,
+    'fitjourneyplanner.com': 9000,
+}
 
 companyName = '深圳白羽千翎科技有限公司';
+companyId = '1739933528455'
 domainArr = $.trim(`
 vectorprompt.cc
 cryptonotes.cc
@@ -93,23 +110,38 @@ idArr = $.trim(`
 1619540982244725
 1619540982244726
 `).split("\n");
+domainMoneyArr = {}
+
+/**
+ * 根据营业额计算推广费
+ * @param revenue 营业额
+ * @returns {number|number}
+ */
+function calculateAdFee(revenue) {
+    let randomAdFee = (Number)((Math.random() * (maxDailyMoney - minDailyMoney) + minDailyMoney).toFixed(2))
+
+    // 如果营业额为 0，则推广费固定为 2~10
+    if (!revenue || revenue <= 0) {
+        return randomAdFee;
+    }
+
+    let baseFee = revenue * 0.01 / formatDate().length;  // 计算营业额的 1%
+    if (baseFee < minDailyMoney) {
+        return randomAdFee;
+    }
+
+    baseFee += randomAdFee;
+    baseFee = (Number)(baseFee.toFixed(2));
+
+    return baseFee;
+}
 
 function generateRandomMoney() {
     // 生成最小值为 x，最大值为 y 的随机数
-    var min = maxDailyMoney * 7;
-    var max = maxDailyMoney * 2 * 7;
+    let min = 100;
+    let max = 1000;
 
-    var moneyArr = []
-    for (var i = 0, len = 10; i < len; i++) {
-        moneyArr.push((Number)((Math.random() * (max - min) + min).toFixed(2)))
-    }
-
-    // 排序
-    moneyArr = moneyArr.sort(function (a, b) {
-        return b - a
-    });
-
-    return moneyArr;
+    return (Number)((Math.random() * (max - min) + min).toFixed(2));
 }
 
 function formatDate() {
@@ -130,10 +162,25 @@ function formatDate() {
 
 function pageIndex() {
     $('span.etctitle').first().text(companyName)
-    $('span.userinfo-id').first().text('ID:' + Date.now())
+    $('span.userinfo-id').first().text('ID:' + companyId)
     $('.ant-statistic-content-value-int').eq(1).text('10')
     $('span.ant-select-selection-item[title="昨天"]').text('近7天')
-    let myElement = $('ul.cost-rank').eq(1)
+
+
+    // FB账户可用余额
+    let balanceFB = generateRandomMoney()
+    $("#root > section.ant-layout.ant-layout-has-sider > section > section > div.ant-spin-nested-loading > div > div > div.avatar-box.ml-4 > div > div:nth-child(3) > div.flexbetwee > div:nth-child(2) > div.ant-statistic-content").text(`$${balanceFB}`)
+
+    // TT账户可用余额
+    let balanceTT = 50
+
+
+    // 总可用余额
+    let balanceAll = balanceFB + balanceTT
+    balanceAll = Number(balanceAll.toFixed(2))
+    $('#root > section.ant-layout.ant-layout-has-sider > section > section > div.ant-spin-nested-loading > div > div > div.avatar-box.ml-4 > div > div:nth-child(7) > div.ant-statistic > div.ant-statistic-content').text(`$${balanceAll}`)
+
+    let myElement = $('ul.cost-rank').last()
     myElement.css('height', '370px')
     myElement.parent().css('height', '370px')
     myElement.html('')
@@ -151,11 +198,20 @@ function pageIndex() {
 
     document.title = 'home'
     $('.addata-box').remove()
-    $('#root > section.ant-layout.ant-layout-has-sider > section > section > div:nth-child(2)').remove()
+
+    myElement = $('#root > section.ant-layout.ant-layout-has-sider > section > section > div:nth-child(2)');
+    if (myElement.text().indexOf('账户消耗排名') === -1) {
+        myElement.remove()
+    }
     $('#root > section.ant-layout.ant-layout-has-sider > section > section > div:nth-child(5)').remove()
 }
 
 function pageChart() {
+    let domain = domainArr[currentDomainKey]
+    if (!domain) {
+        return
+    }
+
     document.title = currentDomainKey + 1
 
     // let bgDiv = `<div id="bg" style="width: 200px;height: 100px;position: absolute;top: 259px;right: 50px;background: white;"></div>`
@@ -165,12 +221,11 @@ function pageChart() {
     $('input[placeholder="结束日期"]').val(formatDate()[3])
     $('.ant-pagination-total-text').text(`总共 ${formatDate().length} 条`)
 
-    let domain = domainArr[currentDomainKey]
     // 生成最小值为 x，最大值为 y 的随机数
     let moneyArr = []
     let moneySum = 0;
     for (let i = 0, len = formatDate().length; i < len; i++) {
-        let currentMoney = (Number)((Math.random() * (maxDailyMoney - minDailyMoney) + minDailyMoney).toFixed(2))
+        let currentMoney = calculateAdFee(domainMoneyArr[domain])
         moneySum += currentMoney
         moneyArr.push(currentMoney)
     }
@@ -206,7 +261,7 @@ function pageChart() {
         }
         window.addEventListener('resize', myChart.resize);
         console.log('done', new Date())
-    }, 1000)
+    }, 500)
 }
 
 setTimeout(function () {
@@ -263,5 +318,9 @@ $(document).ready(function () {
 });
 
 /**
+ 第二次以后执行的命令
  currentDomainKey++;pageChart();
+
+ 首页数据加载失败后执行的命令
+ pageIndex();
  */
