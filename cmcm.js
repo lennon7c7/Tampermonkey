@@ -13,8 +13,8 @@
 console.log('init', new Date())
 
 let pageIndexData = [];
-let minDailyMoney = 50;
-let maxDailyMoney = 100;
+let minDailyMoney = 200;
+let maxDailyMoney = 300;
 let currentDomainKey = 0;
 let companyName = '深圳市顺风顺水科技有限公司';
 // 随机生成的，无实际意义
@@ -146,7 +146,7 @@ function generateRandomMoney() {
 
 function formatDate() {
     let dateArr = []
-    for (let i = 4; i >= 1; i--) {
+    for (let i = 7; i >= 1; i--) {
         let date = new Date();
         date.setDate(date.getDate() - i);
         let year = date.getFullYear();
