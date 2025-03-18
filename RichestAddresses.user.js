@@ -4,7 +4,7 @@
 // @version      1.0
 // @description  访问页面，自动导出TXT文件
 // @author       Lennon
-// @match        https://bitinfocharts.com/top-100-richest-bitcoin-addresses-1.html
+// @match        https://bitinfocharts.com/top-100-*-addresses.html
 // @require      https://code.jquery.com/jquery-2.1.1.min.js
 // @require      https://js.zapjs.com/js/download.js
 // @grant        GM_xmlhttpRequest
@@ -13,49 +13,52 @@
 // ==/UserScript==
 'use strict';
 
-let novelUrl = '';
-let novelBookid = '';
-let novelChapterid = '';
-let novelChaptername = '';
-let novelFilename = '';
-let novelTitle = '';
-let novelContent = '';
-let novelContentReplace = {};
+let coinFilename = '';
+let coinContent = '';
 
 async function siteBitinfocharts() {
     await sleep(10000);
 
-    let maxPageSize = 100;
-    for (let i = 1; i <= maxPageSize; i++) {
-        let pageUrl = `https://bitinfocharts.com/top-100-richest-bitcoin-addresses-${i}.html`
+    // 正则表达式：匹配 - 后，直到遇到 .html 为止的所有字符
+    const regexPageUrl = /-(\d+)\.html/;
 
+    // 正则表达式：匹配 /address/ 后，直到遇到 "/" 或 "?" 为止的所有字符
+    const regexAddress = /\/address\/([^\/?]+)/;
+
+    let pageUrl = location.href
+    let match = pageUrl.match(regexPageUrl);
+    let startPageSize = 1;
+    if (!match) {
+        pageUrl = pageUrl.replace('addresses.html', 'addresses-1.html');
+    } else {
+        startPageSize = match[1];
+    }
+    let maxPageSize = 100;
+
+
+    for (let i = startPageSize; i <= maxPageSize; i++) {
+        var newPageUrl = pageUrl.replace(regexPageUrl, `-${i}.html`);
         await $.ajax({
-            url: pageUrl,
+            url: newPageUrl,
             type: 'GET',
             success: function (res) {
                 $(res).find('td > a').map(function () {
                     let address = $(this).attr('href')
-                    address = address.replace('https://bitinfocharts.com/bitcoin/address/', '')
-                    novelContent += address + '\n';
+                    const match = address.match(regexAddress);
+                    if (match) {
+                        address = match[1]
+                        coinContent += address + '\n';
+                    } else {
+                        console.error("未匹配到地址:", address);
+                    }
+
                 }).get();
             }
         });
     }
 
-    novelFilename = `${location.host}.txt`;
-    download(novelContent, novelFilename, 'text/plain');
-}
-
-function getQueryVariable(variable) {
-    let query = window.location.search.substring(1);
-    let vars = query.split('&');
-    for (let i = 0; i < vars.length; i++) {
-        let pair = vars[i].split('=');
-        if (pair[0] === variable) {
-            return pair[1];
-        }
-    }
-    return false;
+    coinFilename = `${document.title}.txt`;
+    download(coinContent, coinFilename, 'text/plain');
 }
 
 async function main() {
