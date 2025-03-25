@@ -18,13 +18,12 @@
     let fakeUrl = 'asdfasdfasdf.com';
     fakeUrl = `
 
-yyy.cloud
-
+tfaianime.com
 `;
     fakeUrl = fakeUrl.trim();
     let fakeCompany = `
 
-    zzz
+    深圳市悦美境商贸有限公司
 
     `
     fakeCompany = fakeCompany.trim();
@@ -40,8 +39,8 @@ yyy.cloud
 
     function generateRandomMoney() {
         // 生成最小值为100.00，最大值为10000的随机数
-        var min = 100.00;
-        var max = 10000;
+        var min = 10.00;
+        var max = 100;
         var randomNumber = Math.random() * (max - min) + min;
         // 保留两位小数
         return '$' + randomNumber.toFixed(2);

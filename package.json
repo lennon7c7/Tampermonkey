@@ -1,0 +1,13 @@
+{
+  "name": "cmcm-script",
+  "version": "1.0.0",
+  "description": "CMCM Tampermonkey Script",
+  "main": "cmcm.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jquery": "^3.7.1"
+  }
+} 

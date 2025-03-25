@@ -39,6 +39,9 @@ function siteCheetahgo() {
     var elementUsername = $('#cellphone');
     var elementPassword = $('#password');
     var elementButton = $('.submit-btn');
+    elementUsername.val('18607714327')
+    elementPassword.val('Lennon7c7')
+    console.log('elementUsername.val(): ', elementUsername.val())
     if (!elementUsername.val() || !elementPassword.val() || !elementButton.length) {
         return false;
     }

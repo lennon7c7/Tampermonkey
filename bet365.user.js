@@ -140,8 +140,8 @@ async function doUpdate() {
 
     // 循环输出从起始日期到结束日期的每一天
     while (startDate <= endDate) {
-        await doUpdateScheduleGroup(formatDate(startDate));
-        await doUpdateTeam(formatDate(startDate));
+        // await doUpdateScheduleGroup(formatDate(startDate));
+        // await doUpdateTeam(formatDate(startDate));
         await doUpdateGame(formatDate(startDate));
 
         // 增加一天
@@ -282,7 +282,7 @@ async function doUpdateGame(startDate) {
         let respEn = ''
         let respCh = ''
         let languageIDEn = '1'
-        let languageIDCh = '10'
+        let languageIDCh = '1'
         let sqlExec
 
         const urlObj = new URL('https://extra.365-023.com/ResultsApi/GetFixtures?sportId=1&competitionId=999999&challengeId=0&fixtureId=0&fromDate=2024-05-15&toDate=2024-05-15&isDynamic=false&linkId=0&teamId=0&sportDescriptor=%E8%B6%B3%E7%90%83&isVirtual=false&ct=42&lng=10&st=108&tz=GMTPlus8&ot=Decimals');
