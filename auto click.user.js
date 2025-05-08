@@ -5,6 +5,7 @@
 // @author       Lennon
 // @match        https://*.zhihu.com/*
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
+// @match        https://sepolia-faucet.pk910.de/*
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
@@ -12,13 +13,26 @@
 // ==/UserScript==
 'use strict';
 
+// Initialize
+console.log('init', new Date());
+
 setTimeout(function () {
     if ($.inArray(location.hostname, ['www.fuyin9.com']) >= 0) {
         siteFuyin9();
     } else if (location.hostname.search('zhihu.com') !== -1) {
         siteZhihu();
+    } else if (location.hostname.search('sepolia-faucet.pk910.de') !== -1) {
+        siteSepoliaFaucet();
     }
+
+    console.log('done', new Date());
 }, 3000);
+
+function siteSepoliaFaucet() {
+    setInterval(function () {
+        $('.btn-success').click();
+    }, 60000);
+}
 
 function siteZhihu() {
     $('.Modal-closeButton').click();
