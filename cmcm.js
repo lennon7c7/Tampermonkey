@@ -105,14 +105,34 @@ iamchefextraordinaire.cc`.split('\n'),
 1619540982244725
 1619540982244726`.split('\n'),
         domainMoney: {}
-    }
+    },
+    SIFANG: {
+        name: '深圳四方扬科技有限公司',
+        id: '1739933528456',
+        domains: `fiestafits.com
+caribecloset.com
+cladessence.com
+nocturnelace.com
+velvet-aura.net
+lumethread.net
+eclatwardrobe.com`.split('\n'),
+        ids: `1619540982244727
+1619540982244728
+1619540982244729
+1619540982244730
+1619540982244731
+1619540982244732
+1619540982244733       
+      `.split('\n'),
+        domainMoney: {}
+    },
 };
 
 // State management
 let state = {
     pageIndexData: [],
     currentDomainKey: 0,
-    currentCompany: COMPANIES.BAIYU
+    currentCompany: COMPANIES.SIFANG
 };
 
 // Utility functions
@@ -167,15 +187,16 @@ const pageHandlers = {
             const balanceAll = Number((balanceFB + balanceTT).toFixed(2));
             $('#root > section.ant-layout.ant-layout-has-sider > section > section > div.ant-spin-nested-loading > div > div > div.avatar-box.ml-4 > div > div:nth-child(7) > div.ant-statistic > div.ant-statistic-content').text(`$${balanceAll}`);
 
-            const myElement = $('ul.cost-rank').last();
+            const myElement = $('.mb5').parent();
             myElement.css('height', CONFIG.TABLE_HEIGHT + 'px');
             myElement.parent().css('height', CONFIG.TABLE_HEIGHT + 'px');
-            myElement.html('');
 
+            let liElement = '';
             state.pageIndexData.sort((a, b) => b.money - a.money);
             state.pageIndexData.forEach((item, index) => {
-                myElement.append(`<li><label class="list-tip">TOP${index + 1}</label><span class="ml20 pointer">${item.domain}</span><label class="fr">$${item.money}</label></li>`);
+                liElement += `<li style="text-align: left"><label class="list-tip">TOP${index + 1}</label><span class="ml20 pointer">${item.domain}</span><label class="fr">$${item.money}</label></li>`;
             });
+            myElement.html(`<ul class="cost-rank" style="height: 100%;">${liElement}</ul>`);
 
             document.title = 'home';
             $('.addata-box').remove();
@@ -184,6 +205,8 @@ const pageHandlers = {
             if (element.text().indexOf('账户消耗排名') === -1) {
                 element.remove();
             }
+            $("div.ant-spin-nested-loading:contains('素材消耗排名')").remove();
+
             $('#root > section.ant-layout.ant-layout-has-sider > section > section > div:nth-child(5)').remove();
         } catch (error) {
             console.error('Error in pageIndex:', error);
@@ -309,6 +332,8 @@ $(document).ready(() => {
     };
 
     setTimeout(() => {
+        $('.ant-dropdown-trigger').html('您好');
+
         if (window.location.pathname.indexOf('/index/workplat') >= 0) {
             pageHandlers.pageIndex();
         } else if (window.location.pathname.indexOf('/datamanage/account') >= 0) {
@@ -319,11 +344,12 @@ $(document).ready(() => {
 
 /**
  * 控制台命令说明：
+ * 1. 把所有代码复制到控制台中
  *
- * 1. 切换到下一个域名并更新图表：
+ * 2. 切换到下一个域名并更新图表：
  * nextDomain()
  *
- * 2. 重置首页数据：
+ * 3. 重置首页数据：
  * resetIndex()
  *
  * 注意：这些命令只能在控制台中执行
