@@ -222,7 +222,7 @@ const pageHandlers = {
 
             $('#rc-tabs-0-panel-1').css('height', CONFIG.CHART_HEIGHT + 'px');
             $('input[placeholder="开始日期"]').val(utils.formatDate()[0]);
-            $('input[placeholder="结束日期"]').val(utils.formatDate()[3]);
+            $('input[placeholder="结束日期"]').val(utils.formatDate()[6]);
             $('.ant-pagination-total-text').text(`总共 ${utils.formatDate().length} 条`);
 
             const moneyArr = [];
