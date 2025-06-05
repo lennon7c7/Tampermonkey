@@ -115,14 +115,22 @@ cladessence.com
 nocturnelace.com
 velvet-aura.net
 lumethread.net
-eclatwardrobe.com`.split('\n'),
+eclatwardrobe.com
+miroirglam.com
+velourmuse.com
+sakurachic.com
+`.split('\n'),
         ids: `1619540982244727
 1619540982244728
 1619540982244729
 1619540982244730
 1619540982244731
 1619540982244732
-1619540982244733       
+1619540982244733
+1619540982244734
+1619540982244735
+1619540982244736
+1619540982244737
       `.split('\n'),
         domainMoney: {}
     },
@@ -139,9 +147,10 @@ let state = {
 const utils = {
     formatDate() {
         const dateArr = [];
+        const offsetDay = 7; // 偏移天数
         for (let i = 7; i >= 1; i--) {
             const date = new Date();
-            date.setDate(date.getDate() - i);
+            date.setDate(date.getDate() - i + offsetDay);
             const year = date.getFullYear();
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
@@ -344,12 +353,12 @@ $(document).ready(() => {
 
 /**
  * 控制台命令说明：
- * 1. 把所有代码复制到控制台中
+ * 1. 把所有代码复制到控制台中 (tampermonkey也要放置一份, 普通修改代码时无更新油猴)
  *
  * 2. 切换到下一个域名并更新图表：
  * nextDomain()
  *
- * 3. 重置首页数据：
+ * 3. 重置首页数据 (只有切换页面不生效时, 才手动执行)：
  * resetIndex()
  *
  * 注意：这些命令只能在控制台中执行
