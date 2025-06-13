@@ -12,10 +12,10 @@
 
 // Constants
 const CONFIG = {
-    MIN_DAILY_MONEY: 200,
-    MAX_DAILY_MONEY: 300,
-    MIN_RANDOM_MONEY: 100,
-    MAX_RANDOM_MONEY: 1000,
+    MIN_DAILY_MONEY: 2,
+    MAX_DAILY_MONEY: 3,
+    MIN_RANDOM_MONEY: 1,
+    MAX_RANDOM_MONEY: 10,
     CHART_HEIGHT: 300,
     TABLE_HEIGHT: 370,
     INITIAL_DELAY: 10000,
@@ -134,6 +134,19 @@ sakurachic.com
       `.split('\n'),
         domainMoney: {}
     },
+    LIYI: {
+        name: '利易成貿易有限公司',
+        id: '1739933528457',
+        domains: `
+aimicrolandscape.com
+crochet-ai.com
+`.split('\n'),
+        ids: `
+1619540982244738
+1619540982244739
+      `.split('\n'),
+        domainMoney: {}
+    },
 };
 
 // State management
@@ -147,7 +160,7 @@ let state = {
 const utils = {
     formatDate() {
         const dateArr = [];
-        const offsetDay = 7; // 偏移天数
+        const offsetDay = 1; // 偏移天数
         for (let i = 7; i >= 1; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i + offsetDay);
