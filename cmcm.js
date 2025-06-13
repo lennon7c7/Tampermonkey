@@ -12,6 +12,7 @@
 
 // Constants
 const CONFIG = {
+    DAY_LEN: 7,
     MIN_DAILY_MONEY: 2,
     MAX_DAILY_MONEY: 3,
     MIN_RANDOM_MONEY: 1,
@@ -161,7 +162,7 @@ const utils = {
     formatDate() {
         const dateArr = [];
         const offsetDay = 1; // 偏移天数
-        for (let i = 7; i >= 1; i--) {
+        for (let i = CONFIG.DAY_LEN; i >= 1; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i + offsetDay);
             const year = date.getFullYear();
@@ -200,7 +201,7 @@ const pageHandlers = {
             $('span.etctitle').first().text(state.currentCompany.name);
             $('span.userinfo-id').first().text('ID:' + state.currentCompany.id);
             $('.ant-statistic-content-value-int').eq(1).text('10');
-            $('span.ant-select-selection-item[title="昨天"]').text('近7天');
+            $('span.ant-select-selection-item[title="昨天"]').text('近' + CONFIG.DAY_LEN + '天');
 
             const balanceFB = utils.generateRandomMoney();
             $("#root > section.ant-layout.ant-layout-has-sider > section > section > div.ant-spin-nested-loading > div > div > div.avatar-box.ml-4 > div > div:nth-child(3) > div.flexbetwee > div:nth-child(2) > div.ant-statistic-content").text(`$${balanceFB}`);
@@ -244,7 +245,7 @@ const pageHandlers = {
 
             $('#rc-tabs-0-panel-1').css('height', CONFIG.CHART_HEIGHT + 'px');
             $('input[placeholder="开始日期"]').val(utils.formatDate()[0]);
-            $('input[placeholder="结束日期"]').val(utils.formatDate()[6]);
+            $('input[placeholder="结束日期"]').val(utils.formatDate()[CONFIG.DAY_LEN - 1]);
             $('.ant-pagination-total-text').text(`总共 ${utils.formatDate().length} 条`);
 
             const moneyArr = [];
