@@ -28,7 +28,8 @@ const COMPANIES = {
     SHUNFENG: {
         name: '深圳市顺风顺水科技有限公司',
         id: '1739065024005',
-        domains: `resumerefine.top
+        domains: `
+resumerefine.top
 promptwizard.top
 backgroundremoverpro.top
 plantaficionado.top
@@ -37,8 +38,10 @@ autovision.top
 promptpic.cloud
 adcrafted.org
 backdropswap.org
-colorsize.org`.split('\n'),
-        ids: `1619540982244697
+colorsize.org
+        `.trim().split('\n'),
+        ids: `
+1619540982244697
 1619540982244698
 1619540982244699
 1619540982244700
@@ -47,13 +50,15 @@ colorsize.org`.split('\n'),
 1619540982244703
 1619540982244704
 1619540982244705
-1619540982244706`.split('\n'),
+1619540982244706
+        `.trim().split('\n'),
         domainMoney: {}
     },
     BEIHE: {
         name: '深圳市蓓赫科技有限公司',
         id: '53112444',
-        domains: `neonpunkartgenerator.com
+        domains: `
+neonpunkartgenerator.com
 expertenglishtranslations.com
 interviewmasterpro.com
 musicsprite.com
@@ -62,8 +67,10 @@ caloriedetect.com
 fitjourneyplanner.com
 speechcraftgen.com
 mathsolvehub.com
-chatbothaven.com`.split('\n'),
-        ids: `1619540982244707
+chatbothaven.com
+        `.trim().split('\n'),
+        ids: `
+1619540982244707
 1619540982244708
 1619540982244709
 1619540982244710
@@ -72,7 +79,8 @@ chatbothaven.com`.split('\n'),
 1619540982244713
 1619540982244714
 1619540982244715
-1619540982244716`.split('\n'),
+1619540982244716
+        `.trim().split('\n'),
         domainMoney: {
             'speechcraftgen.com': 500,
             'mathsolvehub.com': 1400,
@@ -85,7 +93,8 @@ chatbothaven.com`.split('\n'),
     BAIYU: {
         name: '深圳白羽千翎科技有限公司',
         id: '1739933528455',
-        domains: `vectorprompt.cc
+        domains: `
+vectorprompt.cc
 cryptonotes.cc
 aiwriterhub.cc
 lyricgenie.cc
@@ -94,8 +103,10 @@ postpartummeals.cc
 planai.cc
 lyriccomposer.cc
 lyricgenius.cc
-iamchefextraordinaire.cc`.split('\n'),
-        ids: `1619540982244717
+iamchefextraordinaire.cc
+        `.trim().split('\n'),
+        ids: `
+1619540982244717
 1619540982244718
 1619540982244719
 1619540982244720
@@ -104,13 +115,15 @@ iamchefextraordinaire.cc`.split('\n'),
 1619540982244723
 1619540982244724
 1619540982244725
-1619540982244726`.split('\n'),
+1619540982244726
+        `.trim().split('\n'),
         domainMoney: {}
     },
     SIFANG: {
         name: '深圳四方扬科技有限公司',
         id: '1739933528456',
-        domains: `fiestafits.com
+        domains: `
+fiestafits.com
 caribecloset.com
 cladessence.com
 nocturnelace.com
@@ -120,8 +133,9 @@ eclatwardrobe.com
 miroirglam.com
 velourmuse.com
 sakurachic.com
-`.split('\n'),
-        ids: `1619540982244727
+        `.trim().split('\n'),
+        ids: `
+1619540982244727
 1619540982244728
 1619540982244729
 1619540982244730
@@ -132,7 +146,7 @@ sakurachic.com
 1619540982244735
 1619540982244736
 1619540982244737
-      `.split('\n'),
+        `.trim().split('\n'),
         domainMoney: {}
     },
     LIYI: {
@@ -141,11 +155,11 @@ sakurachic.com
         domains: `
 aimicrolandscape.com
 crochet-ai.com
-`.split('\n'),
+        `.trim().split('\n'),
         ids: `
 1619540982244738
 1619540982244739
-      `.split('\n'),
+        `.trim().split('\n'),
         domainMoney: {}
     },
 };
@@ -338,7 +352,7 @@ $(document).ready(() => {
     const _pushState = history.pushState;
     const _replaceState = history.replaceState;
 
-    history.pushState = function() {
+    history.pushState = function () {
         _pushState.apply(history, arguments);
         if (currentURL !== window.location.href) {
             currentURL = window.location.href;
@@ -346,7 +360,7 @@ $(document).ready(() => {
         }
     };
 
-    history.replaceState = function() {
+    history.replaceState = function () {
         _replaceState.apply(history, arguments);
         if (currentURL !== window.location.href) {
             currentURL = window.location.href;
