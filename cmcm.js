@@ -154,7 +154,7 @@ crochet-ai.com
 let state = {
     pageIndexData: [],
     currentDomainKey: 0,
-    currentCompany: COMPANIES.SIFANG
+    currentCompany: COMPANIES.LIYI
 };
 
 // Utility functions
@@ -200,7 +200,7 @@ const pageHandlers = {
         try {
             $('span.etctitle').first().text(state.currentCompany.name);
             $('span.userinfo-id').first().text('ID:' + state.currentCompany.id);
-            $('.ant-statistic-content-value-int').eq(1).text('10');
+            $('.ant-statistic-content-value-int').eq(1).text(state.currentCompany.domains.length);
             $('span.ant-select-selection-item[title="昨天"]').text('近' + CONFIG.DAY_LEN + '天');
 
             const balanceFB = utils.generateRandomMoney();
