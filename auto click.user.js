@@ -30,7 +30,11 @@ setTimeout(function () {
 
 function siteSepoliaFaucet() {
     setInterval(function () {
-        $('.btn-success').click();
+        $('.btn-success').each(function () {
+            if ($(this).text().trim() !== 'Start Mining') {
+                $(this).click();
+            }
+        });
     }, 60000);
 }
 
