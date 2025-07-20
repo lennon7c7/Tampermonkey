@@ -3,7 +3,8 @@
 // @namespace    https://boxnovel.baidu.com/
 // @version      1.0
 // @description  访问页面，自动导出TXT文件
-// @author       Lennon
+// @author       lennonandjune@gmail.com
+// @match        http://www.ibookdown.com/read/*
 // @match        https://boxnovel.baidu.com/boxnovel/*
 // @match        https://m.baidu.com/tcx*
 // @match        http://m.zhangyue.com/readbook/*/*
@@ -514,6 +515,48 @@ function siteQqxs(novelUrl) {
     });
 }
 
+/**
+ * 久久小说下载网
+ * @param novelUrl
+ */
+function siteJjxs(novelUrl) {
+    if (!novelUrl) {
+        return;
+    }
+
+    $.ajax({
+        url: novelUrl,
+        async: false,
+        type: 'GET',
+        success: function (res) {
+            let novelChapterName = $(res).find('.bookname').text().trim();
+
+            let tempContent = $(res).find('#booktxt').text();
+            $.each(novelContentReplace, function (key, value) {
+                tempContent = tempContent.replace(value.searchValue, value.replaceValue);
+            });
+            tempContent = tempContent.trim();
+
+            novelContent += `${novelChapterName}\r\n${tempContent}\r\n\r\n`;
+
+            setTimeout(function () {
+                let elementNextChapter = $($(res).find('#next_url')).first();
+                let nextUrl = elementNextChapter.attr('href')
+                if (!nextUrl) {
+                    if (novelContent) {
+                        novelFilename = `${novelTitle}.txt`;
+                        download(novelContent, novelFilename, 'text/plain');
+                    }
+
+                    return;
+                }
+
+                siteJjxs(nextUrl);
+            }, 100);
+        }
+    });
+}
+
 async function siteBiquge(novelUrl) {
     if (!novelUrl) {
         return;
@@ -869,6 +912,12 @@ async function main() {
         novelUrl = location.href;
 
         siteQqxs(decodeURIComponent(novelUrl));
+    } else if (location.host === 'www.ibookdown.com') {
+        novelBookid = location.pathname.split('/')[2];
+        novelTitle = $('meta[name="Keywords"]').attr('content').split(',')[0];
+        novelUrl = location.href;
+
+        siteJjxs(decodeURIComponent(novelUrl));
     }
 
     console.debug('---------- end ----------');
