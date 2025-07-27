@@ -12,8 +12,9 @@ const server = http.createServer((req, res) => {
         });
 
         req.on('end', () => {
+            console.log(`Received body: ${body}`);
             const {command} = JSON.parse(body);
-            console.log(`Received command: ${command}`);
+            // console.log(`Received command: ${command}`);
             // 执行命令
             exec(command, (error, stdout, stderr) => {
                 if (error) {
@@ -22,7 +23,7 @@ const server = http.createServer((req, res) => {
                     return;
                 }
                 res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end(JSON.stringify({output: stdout}));
+                res.end(JSON.stringify({output: stdout.trim()}));
             });
         });
     } else {

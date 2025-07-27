@@ -2,11 +2,12 @@
 // @name         HK CR
 // @version      1.0.0
 // @description  Pause auto logout
-// @author       lennon
+// @author       lennonandjune@gmail.com
 // @license      MIT
 // @match        https://www.e-services.cr.gov.hk/*
 // @require      https://code.jquery.com/jquery-3.7.1.min.js
 // @require      https://unpkg.com/swiper@8/swiper-bundle.min.js
+// @require      https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js
 // @grant        unsafeWindow
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
@@ -14,14 +15,14 @@
 'use strict';
 
 // 发送请求到本地服务器以执行系统命令
-function runLocalCommand(command) {
+function runLocalCommand(command, captchaImg) {
     GM_xmlhttpRequest({
         method: 'POST',
         url: 'http://localhost:3000/run-command',
         headers: {
             'Content-Type': 'application/json'
         },
-        data: JSON.stringify({command: command}),
+        data: JSON.stringify({command: command, captchaImg: captchaImg}),
         onload: function (response) {
             // 请求成功
             try {
@@ -42,11 +43,12 @@ function runLocalCommand(command) {
     });
 }
 
-// 调用本地命令
-runLocalCommand('echo Hello World');
-
 // 监控 DOM 变化，删除 disable-devtool.min.js 脚本
 const observer = new MutationObserver(mutations => {
+    window.DisableDevtool = function () {
+
+    }
+
     mutations.forEach(mutation => {
         mutation.addedNodes.forEach(node => {
             if (node.tagName === 'SCRIPT' && node.src && node.src.includes('disable-devtool.min.js')) {
@@ -55,6 +57,12 @@ const observer = new MutationObserver(mutations => {
             }
         });
     });
+
+    setInterval(function () {
+        window.DisableDevtool = function () {
+
+        }
+    }, 1000);
 });
 
 // 开始监听 <head> 标签中的变化
@@ -104,8 +112,16 @@ XMLHttpRequest.prototype.send = function (...args) {
         });
 
         if (xhr._url === '/ICRIS3EP/system/common/captcha.do') {
-// console.log('[2]', xhr.response);
-            runLocalCommand(xhr.response)
+            // console.log('[2]', xhr.response);
+            let commandInput = 'echo hi'
+            let captchaImg = JSON.parse(xhr.response).data.captchaImg
+
+            let commandResp = runLocalCommand(commandInput, captchaImg)
+            console.log('[2]', commandResp);
+
+            if (commandResp) {
+                // delayedFillForm()
+            }
         }
     });
     return send.apply(this, args);
@@ -119,10 +135,10 @@ function delayedFillForm() {
         // () => $("#chiName").val("测试"),
         // () => $("#engSurname").val("test"),
         // () => $("#engOtherNames").val("test2"),
-        () => $("#passportNum").val("a123456"),
+        // () => $("#passportNum").val("a123456"),
 
-        () => $("a.audioBtn").click(),
-        () => $("a.refreshBtn").click(),
+        // () => $("a.audioBtn").click(),
+        // () => $("a.refreshBtn").click(),
         // () => $("#captchaCode").val("12345"),
     ];
 
@@ -137,6 +153,9 @@ function delayedFillForm() {
     // } else {
     //     console.debug("接受及提交按钮未找到");
     // }
+
+    let token = $.cookie('JSESSIONID');
+    console.log('[🐵] JSESSIONID:', token);
 }
 
 function main() {
