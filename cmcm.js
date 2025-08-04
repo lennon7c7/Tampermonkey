@@ -13,12 +13,12 @@
 // Constants
 const CONFIG = {
     DAY_LEN: 7,
-    MIN_DAILY_MONEY: 2,
-    MAX_DAILY_MONEY: 3,
-    MIN_RANDOM_MONEY: 1,
-    MAX_RANDOM_MONEY: 10,
+    MIN_DAILY_MONEY: 200,
+    MAX_DAILY_MONEY: 300,
+    MIN_RANDOM_MONEY: 100,
+    MAX_RANDOM_MONEY: 1000,
     CHART_HEIGHT: 300,
-    TABLE_HEIGHT: 370,
+    TABLE_HEIGHT: 400,
     INITIAL_DELAY: 10000,
     CHART_DELAY: 500
 };
@@ -162,13 +162,42 @@ crochet-ai.com
         `.trim().split('\n'),
         domainMoney: {}
     },
+    20250804: {
+        name: '深圳市风轻轻科技有限公司',
+        id: '1739933528458',
+        domains: `
+gadgetgalerie.com
+electroemporio.com
+techtierra.com
+techtemplo.com
+gizmogiro.com
+techtertulia.com
+circuitsoko.com
+gadgetgarten.com
+cybercalle.com
+digipavilion.com
+        `.trim().split('\n'),
+        ids: `
+1619540982244740
+1619540982244741
+1619540982244742
+1619540982244743
+1619540982244744
+1619540982244745
+1619540982244746
+1619540982244747
+1619540982244748
+1619540982244749
+        `.trim().split('\n'),
+        domainMoney: {}
+    },
 };
 
 // State management
 let state = {
     pageIndexData: [],
     currentDomainKey: 0,
-    currentCompany: COMPANIES.LIYI
+    currentCompany: COMPANIES[20250804]
 };
 
 // Utility functions
@@ -214,7 +243,13 @@ const pageHandlers = {
         try {
             $('span.etctitle').first().text(state.currentCompany.name);
             $('span.userinfo-id').first().text('ID:' + state.currentCompany.id);
-            $('.ant-statistic-content-value-int').eq(1).text(state.currentCompany.domains.length);
+
+            $("span").each(function () {
+                if ($(this).text().trim() === "Actice账户数：0") {
+                    $(this).text("Actice账户数：" + state.currentCompany.domains.length);
+                }
+            });
+            $('.top-box').eq('0').hide()
             $('span.ant-select-selection-item[title="昨天"]').text('近' + CONFIG.DAY_LEN + '天');
 
             const balanceFB = utils.generateRandomMoney();
@@ -224,7 +259,7 @@ const pageHandlers = {
             const balanceAll = Number((balanceFB + balanceTT).toFixed(2));
             $('#root > section.ant-layout.ant-layout-has-sider > section > section > div.ant-spin-nested-loading > div > div > div.avatar-box.ml-4 > div > div:nth-child(7) > div.ant-statistic > div.ant-statistic-content').text(`$${balanceAll}`);
 
-            const myElement = $('.mb5').parent();
+            const myElement = $('.ant-empty').eq(1).parent();
             myElement.css('height', CONFIG.TABLE_HEIGHT + 'px');
             myElement.parent().css('height', CONFIG.TABLE_HEIGHT + 'px');
 
@@ -233,7 +268,7 @@ const pageHandlers = {
             state.pageIndexData.forEach((item, index) => {
                 liElement += `<li style="text-align: left"><label class="list-tip">TOP${index + 1}</label><span class="ml20 pointer">${item.domain}</span><label class="fr">$${item.money}</label></li>`;
             });
-            myElement.html(`<ul class="cost-rank" style="height: 100%;">${liElement}</ul>`);
+            myElement.html(`<ul class="cost-rank" style="height: 100%; width: 100%">${liElement}</ul>`);
 
             document.title = 'home';
             $('.addata-box').remove();
