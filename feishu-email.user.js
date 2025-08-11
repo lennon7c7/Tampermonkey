@@ -47,7 +47,7 @@ const fetchWithRetry = async (func, domain, respData, retries = 3, delayTime = 2
             attempt++;
             console.error(`Error on attempt ${attempt} for ${domain}: ${error}`);
             if (attempt < retries) {
-                console.log(`Retrying in ${delayTime}ms...`);
+                console.debug(`Retrying in ${delayTime}ms...`);
                 await delay(delayTime);
             }
         }
@@ -72,7 +72,7 @@ const step1GetVerify = async (domain, respData) => {
 
         const result = await response.json();
         respData.push(`${domain}\n${result.data.code}\n\n`);
-        console.log(`${domain} ${result.data.code}\n\n`);
+        console.debug(`${domain} ${result.data.code}\n\n`);
     } catch (error) {
         throw new Error(`Failed to get verify code for domain: ${domain}`);
     }
@@ -96,7 +96,7 @@ const step2IsVerify = async (domain, respData) => {
 
         const result = await response.json();
         respData.push(`${domain}\n${result.data.is_verified}\n`);
-        console.log(`${domain}\n${result.data.is_verified}\n\n`);
+        console.debug(`${domain}\n${result.data.is_verified}\n\n`);
     } catch (error) {
         throw new Error(`Failed to verify ownership for domain: ${domain}`);
     }
@@ -120,7 +120,7 @@ const step3CreateEmail = async (domain, respData) => {
 
         const result = await response.json();
         respData.push(`${domain}\n${result.data.message}\n`);
-        console.log(`${domain}\n${result.data.message}\n\n`);
+        console.debug(`${domain}\n${result.data.message}\n\n`);
     } catch (error) {
         throw new Error(`Failed to create email for domain: ${domain}`);
     }
@@ -144,7 +144,7 @@ const step4GetEmail = async (domain, respData) => {
 
         const result = await response.json();
         respData.push(result.data.list[0].email.trim());
-        console.log(`${domain} ${result.data.list[0].email}\n\n`);
+        console.debug(`${domain} ${result.data.list[0].email}\n\n`);
     } catch (error) {
         throw new Error(`Failed to get email for domain: ${domain}`);
     }
@@ -161,56 +161,56 @@ const processDomains = async () => {
 
     // Step 1: Verify each domain
     let respData = [];
-    console.log("Step 1: Verifying domains...");
+    console.debug("Step 1: Verifying domains...");
     for (let i = 0; i < domains.length; i++) {
         const success = await fetchWithRetry(step1GetVerify, domains[i], respData);
         if (!success) {
-            console.log(`Step 1 failed for domain: ${domains[i]}. Skipping.`);
+            console.debug(`Step 1 failed for domain: ${domains[i]}. Skipping.`);
             break;
         }
     }
     let respMsg = `需要给以下域名加TXT记录\n`
     let respDataMsg = respData.join("\n").trim()
-    console.log(respMsg, respDataMsg)
+    console.debug(respMsg, respDataMsg)
 
     // Step 2: Check if domains are verified
     respData = [];
-    console.log("Step 2: Checking domain verification...");
+    console.debug("Step 2: Checking domain verification...");
     for (let i = 0; i < domains.length; i++) {
         const success = await fetchWithRetry(step2IsVerify, domains[i], respData);
         if (!success) {
-            console.log(`Step 2 failed for domain: ${domains[i]}. Skipping.`);
+            console.debug(`Step 2 failed for domain: ${domains[i]}. Skipping.`);
             break;
         }
     }
 
     // Step 3: Create email for each domain
     respData = [];
-    console.log("Step 3: Creating emails...");
+    console.debug("Step 3: Creating emails...");
     for (let i = 0; i < domains.length; i++) {
         const success = await fetchWithRetry(step3CreateEmail, domains[i], respData);
         if (!success) {
-            console.log(`Step 3 failed for domain: ${domains[i]}. Skipping.`);
+            console.debug(`Step 3 failed for domain: ${domains[i]}. Skipping.`);
             break;
         }
     }
 
     // Step 4: Get created emails
     respData = [];
-    console.log("Step 4: Fetching created emails...");
+    console.debug("Step 4: Fetching created emails...");
     for (let i = 0; i < domains.length; i++) {
         const success = await fetchWithRetry(step4GetEmail, domains[i], respData);
         if (!success) {
-            console.log(`Step 4 failed for domain: ${domains[i]}. Skipping.`);
+            console.debug(`Step 4 failed for domain: ${domains[i]}. Skipping.`);
             break;
         }
     }
     respMsg = `已开通邮箱, 在你的xxx, yyy里能看到\n`
     respDataMsg = respData.join("\n").trim()
-    console.log(respMsg, respDataMsg)
+    console.debug(respMsg, respDataMsg)
 
     // Final summary
-    console.log("Process completed successfully.");
+    console.debug("Process completed successfully.");
 };
 
 processDomains();
