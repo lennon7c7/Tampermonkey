@@ -6,6 +6,7 @@
 // @match        https://*.zhihu.com/*
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
 // @match        https://sepolia-faucet.pk910.de/*
+// @match        https://movie.douban.com/*
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
@@ -23,10 +24,26 @@ setTimeout(function () {
         siteZhihu();
     } else if (location.hostname.search('sepolia-faucet.pk910.de') !== -1) {
         siteSepoliaFaucet();
+    } else if (location.hostname.search('movie.douban.com') !== -1) {
+        siteDouban();
     }
 
     console.log('done', new Date());
 }, 3000);
+
+function siteDouban() {
+    // 定义一个函数用于检查按钮并点击
+    function checkAndClickSave() {
+        var $btn = $('input[type="submit"][name="save"][value="保存"]');
+        if ($btn.length > 0) {
+            $btn.click();
+            console.log("按钮已点击");
+        }
+    }
+
+    // 设置定时循环，每隔1秒执行一次
+    setInterval(checkAndClickSave, 5000);
+}
 
 function siteSepoliaFaucet() {
     setInterval(function () {
