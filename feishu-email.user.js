@@ -171,7 +171,8 @@ const processDomains = async () => {
     }
     let respMsg = `需要给以下域名加TXT记录\n`
     let respDataMsg = respData.join("\n").trim()
-    console.debug(respMsg, respDataMsg)
+    respMsg += respDataMsg
+    console.debug(respMsg)
 
     // Step 2: Check if domains are verified
     respData = [];
@@ -207,7 +208,8 @@ const processDomains = async () => {
     }
     respMsg = `已开通邮箱, 在你的xxx, yyy里能看到\n`
     respDataMsg = respData.join("\n").trim()
-    console.debug(respMsg, respDataMsg)
+    respMsg += respDataMsg
+    console.debug(respMsg)
 
     // Final summary
     console.debug("Process completed successfully.");
