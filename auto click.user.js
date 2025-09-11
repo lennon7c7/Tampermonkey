@@ -7,6 +7,7 @@
 // @match        https://www.fuyin9.com/shengjing/read/niv/*
 // @match        https://sepolia-faucet.pk910.de/*
 // @match        https://movie.douban.com/*
+// @match        https://bitcoinfaucet.uo1.net/send.php
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://file2.yueka.com/shengjing/static/js/jquery.jplayer.js
 // @run-at       document-end
@@ -26,10 +27,40 @@ setTimeout(function () {
         siteSepoliaFaucet();
     } else if (location.hostname.search('movie.douban.com') !== -1) {
         siteDouban();
+    } else if (location.hostname.search('uo1.net') !== -1) {
+        siteBitcoinfaucet();
     }
 
     console.log('done', new Date());
 }, 3000);
+
+function siteBitcoinfaucet() {
+    var maxWait = 60000; // 最大等待时间 60 秒
+    var interval = 1000; // 检查间隔 1 秒
+    var elapsed = 0;
+
+    var checkInterval = setInterval(function () {
+        elapsed += interval;
+
+        if ($('altcha-widget').text().trim() === 'Verified') {
+            clearInterval(checkInterval); // 停止轮询
+
+            // 点击 span（带 onclick 的）
+            $("span[onclick]").trigger('click');
+
+            // 设置地址
+            $('#validationTooltipAddress').val('tb1qrahxudg6m3x3j7e0g08gwrm7jdmf2w9avcprlk')
+                .val('tb1qa8u8xt0ay074nq7egcrqhulr256gy62pcrm7vq')
+                .val('tb1qhy7ssfgex2pu3va4lmsa9xmc5jst72vc0c5gdz');
+
+            // 点击发送按钮
+            $('#send_btn').trigger('click');
+        } else if (elapsed >= maxWait) {
+            clearInterval(checkInterval); // 超时后停止轮询
+            console.warn("等待 Verified 超时，未执行操作");
+        }
+    }, interval);
+}
 
 function siteDouban() {
     // 定义一个函数用于检查按钮并点击
