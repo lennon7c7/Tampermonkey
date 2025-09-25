@@ -58,7 +58,7 @@ const fetchWithRetry = async (func, domain, respData, retries = 3, delayTime = 2
 const step1CreateDomain = async (domain, respData) => {
     try {
         const request_time_id = generateRequestTimeId();
-        const body = "{\"domain_name\":\"" + domain + "\",\"setup_type\":2,\"setup_domain_type\":2,\"request_time_id\":\"" + request_time_id + "\"}";
+        const body = "{\"domain_name\":\"" + domain + "\",\"setup_type\":1,\"setup_domain_type\":1,\"request_time_id\":\"" + request_time_id + "\"}";
         const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/domain/gaia_create_primary_domain", {
             headers: {
                 "accept": "application/json, text/plain, */*",
