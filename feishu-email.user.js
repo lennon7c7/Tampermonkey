@@ -201,7 +201,7 @@ const processDomains = async () => {
                     bbb.com
                     ccc.com`.trim().split('\n');
     for (var i = 0, len = domains.length; i < len; i++) {
-        domains[i] = domains[i].trim()
+        domains[i] = domains[i].trim().replaceAll('https://', '')
     }
 
     // Step 0: create each domain
