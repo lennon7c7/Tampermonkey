@@ -105,14 +105,11 @@ const step1GetVerify = async (domain, respData) => {
     try {
         const body = `{"domain":"${domain}"}`;
         const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/domain/get_verify_code", {
-            method: "POST",
-            headers: {
+            method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
                 "x-csrf-token": getCsrfToken(),
-            },
-            body: body,
-            credentials: "include"
+            }, body: body, credentials: "include"
         });
 
         const result = await response.json();
@@ -129,14 +126,11 @@ const step2IsVerify = async (domain, respData) => {
         const request_time_id = generateRequestTimeId();
         const body = `{"domain_name":"${domain}","request_time_id":"${request_time_id}"}`;
         const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/email/verify/gaia_verify_ownership", {
-            method: "POST",
-            headers: {
+            method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
                 "x-csrf-token": getCsrfToken(),
-            },
-            body: body,
-            credentials: "include"
+            }, body: body, credentials: "include"
         });
 
         const result = await response.json();
@@ -153,14 +147,11 @@ const step3CreateEmail = async (domain, respData) => {
         const request_time_id = generateRequestTimeId();
         const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7504969306624212995"],"request_time_id":"${request_time_id}"}`;
         const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/shared_email/create_shared_email_v2", {
-            method: "POST",
-            headers: {
+            method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
                 "x-csrf-token": getCsrfToken(),
-            },
-            body: body,
-            credentials: "include"
+            }, body: body, credentials: "include"
         });
 
         const result = await response.json();
@@ -177,14 +168,11 @@ const step4GetEmail = async (domain, respData) => {
         const request_time_id = generateRequestTimeId();
         const body = `{"search_word":"${domain}","page":1,"page_size":20,"request_time_id":"${request_time_id}"}`;
         const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/shared_email/get_shared_emails_v2", {
-            method: "POST",
-            headers: {
+            method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
                 "x-csrf-token": getCsrfToken(),
-            },
-            body: body,
-            credentials: "include"
+            }, body: body, credentials: "include"
         });
 
         const result = await response.json();
@@ -197,9 +185,11 @@ const step4GetEmail = async (domain, respData) => {
 
 // Main function to process steps sequentially
 const processDomains = async () => {
-    let domains = `aaa.com
-                    bbb.com
-                    ccc.com`.trim().split('\n');
+    let domains = `
+aaa.com
+bbb.com
+ccc.com
+`.trim().split('\n').filter(d => d.trim() !== '');
     for (var i = 0, len = domains.length; i < len; i++) {
         domains[i] = domains[i].trim().replaceAll('https://', '')
     }
@@ -272,3 +262,4 @@ const processDomains = async () => {
 };
 
 processDomains();
+
