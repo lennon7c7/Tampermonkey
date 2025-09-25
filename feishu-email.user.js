@@ -55,6 +55,51 @@ const fetchWithRetry = async (func, domain, respData, retries = 3, delayTime = 2
     return false; // Failed after retries
 };
 
+const step1CreateDomain = async (domain, respData) => {
+    try {
+        const request_time_id = generateRequestTimeId();
+        const body = "{\"domain_name\":\"" + domain + "\",\"setup_type\":2,\"setup_domain_type\":2,\"request_time_id\":\"" + request_time_id + "\"}";
+        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/domain/gaia_create_primary_domain", {
+            headers: {
+                "accept": "application/json, text/plain, */*",
+                "accept-language": "en,zh-CN;q=0.9,zh;q=0.8",
+                "cache-control": "no-cache",
+                "content-type": "application/json;charset=UTF-8",
+                "credentials": "same-origin",
+                "device-platform": "TerminalType_WEB",
+                "pragma": "no-cache",
+                "priority": "u=1, i",
+                "rpc-persist-lane-c-lark-uid": "0",
+                "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"Windows\"",
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-origin",
+                "x-csrf-token": getCsrfToken(),
+                "x-lgw-app-id": "1161",
+                "x-lgw-os-type": "1",
+                "x-lgw-terminal-type": "2",
+                "x-request-version": "v2",
+                "x-requested-with": "XMLHttpRequest",
+                "x-timezone-offset": "-480"
+            },
+            "referrer": "https://ha4rxhcsndn.feishu.cn/admin/email/setup/domainManagement/editSetupV2",
+            "referrerPolicy": "strict-origin-when-cross-origin",
+            "body": body,
+            method: "POST",
+            "mode": "cors",
+            credentials: "include"
+        });
+
+        const result = await response.json();
+        respData.push(`${domain}\n${result.data.code}\n\n`);
+        console.debug(`${domain} ${result.data.code}\n\n`);
+    } catch (error) {
+        throw new Error(`Failed to get verify code for domain: ${domain}`);
+    }
+};
+
 // Step 1: Verify the domain
 const step1GetVerify = async (domain, respData) => {
     try {
@@ -159,8 +204,19 @@ const processDomains = async () => {
         domains[i] = domains[i].trim()
     }
 
-    // Step 1: Verify each domain
+    // Step 0: create each domain
     let respData = [];
+    console.debug("Step 1: create domains...");
+    for (let i = 0; i < domains.length; i++) {
+        const success = await fetchWithRetry(step1CreateDomain, domains[i], respData);
+        if (!success) {
+            console.debug(`Step 1 failed for domain: ${domains[i]}. Skipping.`);
+            break;
+        }
+    }
+
+    // Step 1: Verify each domain
+    respData = [];
     console.debug("Step 1: Verifying domains...");
     for (let i = 0; i < domains.length; i++) {
         const success = await fetchWithRetry(step1GetVerify, domains[i], respData);
