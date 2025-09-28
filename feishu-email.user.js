@@ -3,13 +3,15 @@
 // @version      1.0
 // @description  fix something or make some operations fast
 // @author       lennonandjune@gmail.com
-// @match        https://ha4rxhcsndn.feishu.cn/admin/email/accountManagement/sharedEmail
 // @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @require      https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js
 // @run-at       document-end
 // @icon         http://icons.iconarchive.com/icons/iconshock/cms/128/user-login-icon.png
 // ==/UserScript==
 'use strict';
+
+let feishuUrl = 'https://ha4rxhcsndn.feishu.cn';
+feishuUrl = 'https://tcnvs1zw0mbh.feishu.cn';
 
 const generateRequestTimeId = () => {
     const timestamp = Date.now();  // Get current timestamp in milliseconds
@@ -59,7 +61,7 @@ const step1CreateDomain = async (domain, respData) => {
     try {
         const request_time_id = generateRequestTimeId();
         const body = "{\"domain_name\":\"" + domain + "\",\"setup_type\":1,\"setup_domain_type\":1,\"request_time_id\":\"" + request_time_id + "\"}";
-        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/domain/gaia_create_primary_domain", {
+        const response = await fetch(feishuUrl + "/suite/admin/domain/gaia_create_primary_domain", {
             headers: {
                 "accept": "application/json, text/plain, */*",
                 "accept-language": "en,zh-CN;q=0.9,zh;q=0.8",
@@ -84,7 +86,7 @@ const step1CreateDomain = async (domain, respData) => {
                 "x-requested-with": "XMLHttpRequest",
                 "x-timezone-offset": "-480"
             },
-            "referrer": "https://ha4rxhcsndn.feishu.cn/admin/email/setup/domainManagement/editSetupV2",
+            "referrer": feishuUrl + "/admin/email/setup/domainManagement/editSetupV2",
             "referrerPolicy": "strict-origin-when-cross-origin",
             "body": body,
             method: "POST",
@@ -104,7 +106,7 @@ const step1CreateDomain = async (domain, respData) => {
 const step1GetVerify = async (domain, respData) => {
     try {
         const body = `{"domain":"${domain}"}`;
-        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/domain/get_verify_code", {
+        const response = await fetch(feishuUrl + "/suite/admin/domain/get_verify_code", {
             method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
@@ -125,7 +127,7 @@ const step2IsVerify = async (domain, respData) => {
     try {
         const request_time_id = generateRequestTimeId();
         const body = `{"domain_name":"${domain}","request_time_id":"${request_time_id}"}`;
-        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/email/verify/gaia_verify_ownership", {
+        const response = await fetch(feishuUrl + "/suite/admin/email/verify/gaia_verify_ownership", {
             method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
@@ -145,8 +147,11 @@ const step2IsVerify = async (domain, respData) => {
 const step3CreateEmail = async (domain, respData) => {
     try {
         const request_time_id = generateRequestTimeId();
-        const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7504969306624212995"],"request_time_id":"${request_time_id}"}`;
-        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/shared_email/create_shared_email_v2", {
+        // 1
+        // const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7504969306624212995"],"request_time_id":"${request_time_id}"}`;
+        // 2
+        const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7554950945455489052", "7554959639437934595"],"request_time_id":"${request_time_id}"}`;
+        const response = await fetch(feishuUrl + "/suite/admin/shared_email/create_shared_email_v2", {
             method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
@@ -167,7 +172,7 @@ const step4GetEmail = async (domain, respData) => {
     try {
         const request_time_id = generateRequestTimeId();
         const body = `{"search_word":"${domain}","page":1,"page_size":20,"request_time_id":"${request_time_id}"}`;
-        const response = await fetch("https://ha4rxhcsndn.feishu.cn/suite/admin/shared_email/get_shared_emails_v2", {
+        const response = await fetch(feishuUrl + "/suite/admin/shared_email/get_shared_emails_v2", {
             method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
                 "content-type": "application/json;charset=UTF-8",
