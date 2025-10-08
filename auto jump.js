@@ -6,12 +6,17 @@
 // @match        https://link.zhihu.com/?target=*
 // @match        https://docs.qq.com/scenario/link.html?url=*
 // @match        https://www.youtube.com/*
+// @match        https://chatgpt.com/*
+// @require      https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js
 // @grant        Any
 // @version      1.0
 // @author       Lennon
 // @run-at       document-start
 // ==/UserScript==
 'use strict';
+
+// Initialize
+console.log('init', new Date());
 
 const params = new URLSearchParams(window.location.search)
 let paramTarget = params.get('target')
@@ -32,8 +37,19 @@ switch (location.hostname) {
     case 'docs.qq.com':
         siteDocsQq();
         break;
+    case 'chatgpt.com':
+        siteChatgpt();
+        break;
 }
 
+
+function siteChatgpt() {
+    setTimeout(function () {
+        $('button > div:contains("ChatGPT")').text('ChatGPT 5 Fast')
+        $('.trailing').hide()
+        $('div.truncate[dir="auto"]').text('Plus')
+    }, 10000);
+}
 
 function siteCsdn() {
     // auto jump
@@ -63,3 +79,5 @@ function siteDocsQq() {
         window.location.href = paramTarget
     }
 }
+
+console.log('done', new Date());
