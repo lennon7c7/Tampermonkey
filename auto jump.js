@@ -48,7 +48,16 @@ function siteChatgpt() {
         $('button > div:contains("ChatGPT")').text('ChatGPT 5 Fast')
         $('.trailing').hide()
         $('div.truncate[dir="auto"]').text('Plus')
+        $("#page-header > div.absolute").hide()
     }, 10000);
+
+    setInterval(function () {
+        var $btn = $('button[data-testid="close-button"]');
+        if ($btn.length > 0) {
+            $btn.click();
+            console.log("按钮已点击");
+        }
+    }, 1000);
 }
 
 function siteCsdn() {
