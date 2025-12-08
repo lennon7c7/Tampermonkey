@@ -150,7 +150,7 @@ const step3CreateEmail = async (domain, respData) => {
         // 1
         // const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7504969306624212995"],"request_time_id":"${request_time_id}"}`;
         // 2
-        const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7554950945455489052", "7554959639437934595"],"request_time_id":"${request_time_id}"}`;
+        const body = `{"name":"support","prefix":"support","domain":"${domain}","users":["7554950945455489052", "7554959639437934595", "7581428165948574906"],"request_time_id":"${request_time_id}"}`;
         const response = await fetch(feishuUrl + "/suite/admin/shared_email/create_shared_email_v2", {
             method: "POST", headers: {
                 "accept": "application/json, text/plain, */*",
