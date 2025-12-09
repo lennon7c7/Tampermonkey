@@ -196,7 +196,7 @@ bbb.com
 ccc.com
 `.trim().split('\n').filter(d => d.trim() !== '');
     for (var i = 0, len = domains.length; i < len; i++) {
-        domains[i] = domains[i].trim().replaceAll('https://', '')
+        domains[i] = domains[i].trim().replaceAll('https://', '').replace(/\/$/, '');
     }
 
     // Step 0: create each domain
