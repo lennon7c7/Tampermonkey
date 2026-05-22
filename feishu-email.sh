@@ -40,7 +40,7 @@ extract_csrf_token() {
     echo "$FEISHU_COOKIE" | grep -o 'csrf_token=[^;]*' | cut -d'=' -f2
 }
 
-CSRF_TOKEN="${FEISHU_CSRF_TOKEN:-$(extract_csrf_token)}"
+CSRF_TOKEN=""
 
 # 生成请求时间ID
 generate_request_time_id() {
@@ -58,10 +58,32 @@ feishu_api() {
     local curl_args=(
         -s -X POST "${FEISHU_URL}${endpoint}"
         -H "accept: application/json, text/plain, */*"
+        -H "accept-language: en,zh-CN;q=0.9,zh;q=0.8,zh-TW;q=0.7"
+        -H "cache-control: no-cache"
+        -H "pragma: no-cache"
+        -H "priority: u=1, i"
         -H "content-type: application/json;charset=UTF-8"
+        -H "credentials: same-origin"
+        -H "origin: ${FEISHU_URL}"
+        -H "referer: ${FEISHU_URL}/admin/email/accountManagement/sharedEmail"
+        -H "rpc-persist-lane-c-lark-uid: 0"
+        -H "sec-ch-ua: \"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+        -H "sec-ch-ua-mobile: ?0"
+        -H "sec-ch-ua-platform: \"Windows\""
+        -H "sec-fetch-dest: empty"
+        -H "sec-fetch-mode: cors"
+        -H "sec-fetch-site: same-origin"
+        -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+        -H "x-requested-with: XMLHttpRequest"
         -H "x-csrf-token: ${CSRF_TOKEN}"
         -H "x-lgw-app-id: 1161"
+        -H "x-lgw-os-type: 1"
+        -H "x-lgw-terminal-type: 2"
+        -H "x-lsc-bizid: 13"
+        -H "x-lsc-terminal: web"
+        -H "x-lsc-version: 1"
         -H "x-request-version: v2"
+        -H "x-timezone-offset: -480"
         -H "device-platform: TerminalType_WEB"
         -H "x-admin-user: 7554950945455489052"
         -d "$body"
@@ -139,11 +161,15 @@ json_extract_nested() {
 
 # 检查登录状态
 check_login() {
-    local test_result=$(feishu_api "/suite/admin/shared_email/get_shared_emails_v2" '{"search_word":"test","page":1,"page_size":1,"request_time_id":"_t1"}' "检查登录状态")
+    local request_time_id=$(generate_request_time_id)
+    local body="{\"search_word\":\"test\",\"page\":1,\"page_size\":1,\"request_time_id\":\"${request_time_id}\"}"
+    local test_result=$(feishu_api "/suite/admin/shared_email/get_shared_emails_v2" "$body" "检查登录状态")
     local code=$(echo "$test_result" | jq -r '.code // 0' 2>/dev/null)
 
     if [ "$code" = "10003" ] || [ "$code" = "10009" ]; then
-        echo -e "${RED}登录已失效，请重新获取 Cookie${NC}"
+        local msg=$(echo "$test_result" | jq -r '.message // .msg // "unknown error"' 2>/dev/null)
+        echo -e "${RED}登录校验失败(code=${code}): ${msg}${NC}"
+        echo -e "${YELLOW}提示: 这通常不是纯 Cookie 过期，也可能是请求头不完整或 csrf_token 不匹配${NC}"
         return 1
     fi
     return 0
@@ -174,6 +200,9 @@ query_emails_only() {
 
         # 使用jq提取邮箱列表
         local total=$(echo "$result" | jq -r '.data.total // 0' 2>/dev/null)
+        if ! [[ "$total" =~ ^[0-9]+$ ]]; then
+            total=0
+        fi
         echo -e "$domain: ${YELLOW}总记录数: $total${NC}"
 
         if [ "$total" -gt 0 ]; then
@@ -321,8 +350,11 @@ main() {
 
 # 加载 Cookie 配置文件
 if [ -f ~/.feishu_cookie ] && [ -z "$FEISHU_COOKIE" ]; then
-    FEISHU_COOKIE=$(cat ~/.feishu_cookie | tr -d '\n')
+    FEISHU_COOKIE=$(cat ~/.feishu_cookie | tr -d '\r\n')
 fi
+
+# 在所有 Cookie 来源都加载完成后再计算 CSRF，避免先计算为空
+CSRF_TOKEN="${FEISHU_CSRF_TOKEN:-$(extract_csrf_token)}"
 
 # 运行主函数
 # 支持两种模式：
