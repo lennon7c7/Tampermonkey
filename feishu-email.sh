@@ -13,7 +13,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 FEISHU_URL="https://tcnvs1zw0mbh.feishu.cn"
-CFFS_URL="http://45.77.169.228/bbak/cffsmail.php"
+CFFS_URL=""
 COOKIE_FILE="/tmp/feishu_cookie_$$.txt"
 
 # 清理临时文件
@@ -357,6 +357,7 @@ main() {
         fi
 
         submit_result=$(step1_submit_txt "$domain" "$txt_code")
+        echo -e "  ${YELLOW}TXT 接口返回: $submit_result${NC}"
         submit_status=$(echo "$submit_result" | jq -r '.status // empty' 2>/dev/null)
         if [ "$submit_status" = "success" ]; then
             echo -e "$domain: ${GREEN}TXT 提交成功${NC} (${txt_code})"
@@ -371,19 +372,34 @@ main() {
 
     # Step 2: 验证域名
     echo -e "${GREEN}━━━ Step 2: 验证域名 ━━━${NC}"
+    local verify_failed=0
     for domain in "${DOMAINS[@]}"; do
         domain=$(echo "$domain" | sed 's|https://||' | sed 's|/$||')
         result=$(step2_verify "$domain")
         if ! is_feishu_success "$result"; then
             print_feishu_error "验证域名" "$result"
+            verify_failed=1
         fi
 
         # 使用jq提取is_verified
         is_verified=$(echo "$result" | jq -r '.data.is_verified // false' 2>/dev/null)
 
         echo -e "$domain: ${GREEN}is_verified=$is_verified${NC}"
+        if [ "$is_verified" != "true" ]; then
+            verify_failed=1
+            echo -e "  ${YELLOW}提示: 域名尚未验证通过，后续创建邮箱会失败${NC}"
+        fi
         echo ""
     done
+
+    if [ $verify_failed -ne 0 ]; then
+        echo -e "${RED}Step 2 未全部通过，流程中断。${NC}"
+        echo -e "${YELLOW}排查建议:${NC}"
+        echo -e "1) 检查 TXT 是否已在权威 DNS 生效（可能需要 5-30 分钟）"
+        echo -e "2) 核对 TXT 值是否完整且无多余空格"
+        echo -e "3) 稍后重试: $0 --query ${DOMAINS[*]}"
+        exit 1
+    fi
 
     # Step 3: 创建邮箱
     echo -e "${GREEN}━━━ Step 3: 创建共享邮箱 ━━━${NC}"
