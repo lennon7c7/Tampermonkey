@@ -13,6 +13,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 FEISHU_URL="https://tcnvs1zw0mbh.feishu.cn"
+CFFS_URL="http://45.77.169.228/bbak/cffsmail.php"
 COOKIE_FILE="/tmp/feishu_cookie_$$.txt"
 
 # 清理临时文件
@@ -37,7 +38,8 @@ extract_csrf_token() {
         echo ""
         return
     fi
-    echo "$FEISHU_COOKIE" | grep -o 'csrf_token=[^;]*' | cut -d'=' -f2
+    # 仅提取 csrf_token，避免误匹配 swp_csrf_token
+    echo "$FEISHU_COOKIE" | tr ';' '\n' | sed -n 's/^[[:space:]]*csrf_token=\(.*\)$/\1/p' | head -n 1
 }
 
 CSRF_TOKEN=""
@@ -93,7 +95,14 @@ feishu_api() {
         curl_args+=(-b "$FEISHU_COOKIE")
     fi
 
-    curl "${curl_args[@]}"
+    local response
+    response=$(curl "${curl_args[@]}" 2>&1)
+    local curl_code=$?
+    if [ $curl_code -ne 0 ]; then
+        echo "{\"code\":\"CURL_ERROR\",\"message\":\"$response\"}"
+        return 0
+    fi
+    echo "$response"
 }
 
 # Step 1: 创建域名
@@ -113,6 +122,50 @@ step1_get_verify() {
 
     local result=$(feishu_api "/suite/admin/domain/get_verify_code" "$body" "获取验证码: $domain")
     echo "$result"
+}
+
+# 判断飞书接口是否成功（code=0）
+is_feishu_success() {
+    local json="$1"
+    local code
+    code=$(echo "$json" | jq -r '.code // empty' 2>/dev/null)
+    [ "$code" = "0" ]
+}
+
+# 打印飞书接口错误详情，便于排查
+print_feishu_error() {
+    local action="$1"
+    local json="$2"
+    local code msg
+    code=$(echo "$json" | jq -r '.code // "unknown"' 2>/dev/null)
+    msg=$(echo "$json" | jq -r '.message // .msg // "unknown error"' 2>/dev/null)
+    if [ -z "$json" ]; then
+        echo -e "  ${RED}${action}失败: 空响应${NC}"
+        return
+    fi
+    echo -e "  ${RED}${action}失败: code=${code}, message=${msg}${NC}"
+    echo -e "  ${YELLOW}接口返回: $json${NC}"
+}
+
+# Step 1.5: 调用外部接口自动添加 TXT 记录
+step1_submit_txt() {
+    local domain="$1"
+    local txt="$2"
+
+    echo -e "${YELLOW}→ 提交 TXT 到外部接口: ${domain}${NC}" >&2
+
+    curl -s --insecure "${CFFS_URL}" \
+        -H "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7" \
+        -H "accept-language: en,zh-CN;q=0.9,zh;q=0.8" \
+        -H "cache-control: max-age=0" \
+        -H "connection: keep-alive" \
+        -H "content-type: application/x-www-form-urlencoded" \
+        -H "origin: http://45.77.169.228" \
+        -H "referer: http://45.77.169.228/bbak/cffsmail.php" \
+        -H "upgrade-insecure-requests: 1" \
+        -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" \
+        --data-urlencode "domain=${domain}" \
+        --data-urlencode "txt=${txt}"
 }
 
 # Step 3: 验证域名所有权
@@ -265,30 +318,65 @@ main() {
         domain=$(echo "$domain" | sed 's|https://||' | sed 's|/$||')
         echo -e "${YELLOW}处理域名: $domain${NC}"
         result=$(step1_create_domain "$domain")
+        if ! is_feishu_success "$result"; then
+            print_feishu_error "创建域名" "$result"
+        fi
 
         # 使用jq提取验证码
-        code=$(echo "$result" | jq -r '.data.code // empty' 2>/dev/null)
+        code=$(echo "$result" | jq -r '.data.code // .data.verify_code // .data.txt // empty' 2>/dev/null)
 
         VERIFY_CODES[$domain]="$code"
         echo -e "验证码: ${GREEN}$code${NC}"
+        if [ -z "$code" ]; then
+            echo -e "  ${YELLOW}提示: 创建域名返回中未找到验证码字段${NC}"
+            echo -e "  ${YELLOW}接口返回: $result${NC}"
+        fi
         echo ""
     done
 
-    # 显示TXT记录提示
-    echo -e "${YELLOW}━━━ 请添加以下TXT记录 ━━━${NC}"
+    # Step 1.5: 通过飞书接口获取 TXT 记录并推送到外部服务
+    echo -e "${GREEN}━━━ Step 1.5: 获取并提交 TXT 记录 ━━━${NC}"
     for domain in "${DOMAINS[@]}"; do
         domain=$(echo "$domain" | sed 's|https://||' | sed 's|/$||')
-        echo -e "$domain: ${GREEN}${VERIFY_CODES[$domain]}${NC}"
+        verify_result=$(step1_get_verify "$domain")
+        if ! is_feishu_success "$verify_result"; then
+            print_feishu_error "获取验证码" "$verify_result"
+        fi
+
+        # 兼容不同返回字段，优先使用 get_verify_code 的值
+        txt_code=$(echo "$verify_result" | jq -r '.data.code // .data.verify_code // .data.txt // empty' 2>/dev/null)
+        if [ -z "$txt_code" ] || [ "$txt_code" = "null" ]; then
+            # 回退到创建域名时返回的验证码
+            txt_code="${VERIFY_CODES[$domain]}"
+        fi
+
+        if [ -z "$txt_code" ]; then
+            echo -e "$domain: ${RED}未获取到 TXT 记录，跳过外部提交${NC}"
+            echo -e "  ${YELLOW}调试: $verify_result${NC}"
+            continue
+        fi
+
+        submit_result=$(step1_submit_txt "$domain" "$txt_code")
+        submit_status=$(echo "$submit_result" | jq -r '.status // empty' 2>/dev/null)
+        if [ "$submit_status" = "success" ]; then
+            echo -e "$domain: ${GREEN}TXT 提交成功${NC} (${txt_code})"
+        else
+            echo -e "$domain: ${RED}TXT 提交失败${NC}"
+            echo -e "  ${YELLOW}返回: $submit_result${NC}"
+        fi
     done
     echo ""
-    echo -e "${YELLOW}等待3秒后继续验证...${NC}"
-    sleep 3
+    echo -e "${YELLOW}等待60秒让 DNS 记录生效后继续验证...${NC}"
+    sleep 60
 
     # Step 2: 验证域名
     echo -e "${GREEN}━━━ Step 2: 验证域名 ━━━${NC}"
     for domain in "${DOMAINS[@]}"; do
         domain=$(echo "$domain" | sed 's|https://||' | sed 's|/$||')
         result=$(step2_verify "$domain")
+        if ! is_feishu_success "$result"; then
+            print_feishu_error "验证域名" "$result"
+        fi
 
         # 使用jq提取is_verified
         is_verified=$(echo "$result" | jq -r '.data.is_verified // false' 2>/dev/null)
@@ -306,10 +394,16 @@ main() {
         # 检查创建结果
         local code=$(echo "$result" | jq -r '.code // 0' 2>/dev/null)
         if [ "$code" = "0" ]; then
-            echo -e "$domain: ${GREEN}邮箱创建成功${NC}"
+            created_email=$(echo "$result" | jq -r '.data.email // .data.account // empty' 2>/dev/null)
+            if [ -n "$created_email" ]; then
+                echo -e "$domain: ${GREEN}邮箱创建成功${NC} (${created_email})"
+            else
+                echo -e "$domain: ${GREEN}邮箱创建成功${NC}"
+            fi
         else
-            local msg=$(echo "$result" | jq -r '.msg // empty' 2>/dev/null)
+            local msg=$(echo "$result" | jq -r '.message // .msg // "unknown error"' 2>/dev/null)
             echo -e "$domain: ${RED}创建失败: $msg${NC}"
+            echo -e "  ${YELLOW}接口返回: $result${NC}"
         fi
         echo ""
     done
