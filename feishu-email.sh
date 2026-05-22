@@ -153,6 +153,7 @@ step1_submit_txt() {
     local txt="$2"
 
     echo -e "${YELLOW}→ 提交 TXT 到外部接口: ${domain}${NC}" >&2
+    echo -e "  ${YELLOW}TXT 提交参数: domain=${domain}, txt=${txt}${NC}" >&2
 
     curl -s --insecure "${CFFS_URL}" \
         -H "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7" \
@@ -173,6 +174,7 @@ step2_verify() {
     local domain="$1"
     local request_time_id=$(generate_request_time_id)
     local body="{\"domain_name\":\"${domain}\",\"request_time_id\":\"${request_time_id}\"}"
+    echo -e "  ${YELLOW}验证参数: $body${NC}" >&2
 
     local result=$(feishu_api "/suite/admin/email/verify/gaia_verify_ownership" "$body" "验证域名: $domain")
     echo "$result"
@@ -183,6 +185,7 @@ step3_create_email() {
     local domain="$1"
     local request_time_id=$(generate_request_time_id)
     local body="{\"name\":\"support\",\"prefix\":\"support\",\"domain\":\"${domain}\",\"users\":${USERS},\"request_time_id\":\"${request_time_id}\"}"
+    echo -e "  ${YELLOW}创建邮箱参数: $body${NC}" >&2
 
     local result=$(feishu_api "/suite/admin/shared_email/create_shared_email_v2" "$body" "创建邮箱: support@${domain}")
     echo "$result"
