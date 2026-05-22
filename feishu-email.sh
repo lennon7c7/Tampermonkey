@@ -353,6 +353,11 @@ main() {
             txt_code="${VERIFY_CODES[$domain]}"
         fi
 
+        # 外部接口仅需要 "=" 后的后缀值
+        if [[ "$txt_code" == *"="* ]]; then
+            txt_code="${txt_code#*=}"
+        fi
+
         if [ -z "$txt_code" ]; then
             echo -e "$domain: ${RED}未获取到 TXT 记录，跳过外部提交${NC}"
             echo -e "  ${YELLOW}调试: $verify_result${NC}"
