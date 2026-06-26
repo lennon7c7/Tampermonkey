@@ -2,6 +2,8 @@
 
 # 飞书邮箱批量创建脚本
 # 从 feishu-email.user.js 转换而来
+# 不能直接使用 document.cookie，出来的是缺少信息的不完整的
+# FEISHU_COOKIE='xxxxxx' ./feishu-email.sh silkkaze.com marbreeze.com florweave.com
 
 set -e
 
